@@ -1,0 +1,433 @@
+%\RequirePackage{podvBookStyleShort}  % подключает стиль
+\RequirePackage{amsmath}
+\RequirePackage{amsfonts}
+\RequirePackage{amssymb}
+\RequirePackage{amsxtra}
+\RequirePackage{nccthm}
+\RequirePackage[english, russian]{babel}
+\RequirePackage[utf8]{inputenc}  % для указания кодировки исходного текста
+\RequirePackage[T2A]{fontenc}  % выбор внтуренней кодировки шрифтов LaTeX'а
+\RequirePackage{microtype}  % интерфейс к микротипографическому расширению pdftext для улучшенияобщего впечатления от текста. По умолчанию обеспечивает висячую пунктуацию. Прииспользовании pdflatex в качестве основного компилятора настоятельно рекомендуетсяк использованию!
+% Изменение шрифта для XeLaTeX
+%\RequirePackage{polyglossia}
+%\defaultfontfeatures{Ligatures={TeX},Renderer=Basic}
+%\setmainfont{Times New Roman}     % задаёт \rmfamily, основной шрифт документа
+%\setsansfont{Times New Roman}
+%\setmonofont{Consolas} % задаёт \ttfamily, моношрифт
+% или для LaTeX
+%\renewcommand{\rmdefault}{cmr}  % -- Latin Modern Roman
+%\renewcommand{\sfdefault}{cmss}  % -- Latin Modern Sans Serif
+%\renewcommand{\ttdefault}{cmtt}  % -- Latin Modern Sans Serif
+\RequirePackage[left=2cm, right=2cm, top=2cm, bottom=2cm]{geometry}
+\RequirePackage{url}
+\RequirePackage{topcapt}  % размещает подписи к таблицам сверху
+\RequirePackage{cmap}
+\RequirePackage{fancyref}
+
+\RequirePackage{multirow}
+
+\RequirePackage{hyperref}
+%\RequirePackage[%
+%	unicode,
+%	colorlinks,
+%	linkcolor=deepblue,
+%	citecolor=red,
+%	bookmarksopen,
+%	pdfhighlight=/N]{hyperref}  % поддержка гиперссылок
+\RequirePackage{cite}  % Красивые ссылки на литературу
+\RequirePackage{embedfile}  % внедрить файл в документ
+\RequirePackage{indentfirst}
+\RequirePackage{pb-diagram}
+\RequirePackage{shorttoc}
+%\RequirePackage{tocbibind}  % включает список таблиц, список иллюстраций и список библиографических ссылок в Оглавление; могут возникнуть проблемы с Оглавлением; в Оглавлении появляется раздел Содержание
+%\RequirePackage{draftwatermark}
+\RequirePackage[headings]{nccfancyhdr}
+\RequirePackage{lastpage}
+
+
+%\RequirePackage[Glenn]{fncychap}  % оформление глав: Sonny, Lenny, Glenn(!), Conny, Rejne, Bjornstrup % возникают проблемы со ссылками на страницы
+\RequirePackage[svgnames]{xcolor} % Required to specify font color
+\RequirePackage{colortbl}  % настраивает цвет таблицы
+\RequirePackage{verbatim}  % с помощью команды \verbatiminput{sort_priority.py} позволяет дословно воспроизвести содержимое любого текстовго файла
+\RequirePackage{xspace}  % втсавляет пробел
+\RequirePackage{theorem}
+%\RequirePackage{ifthen}
+\RequirePackage{xifthen}  % улучшенная версия ifthen
+\RequirePackage{graphicx}
+\RequirePackage[labelsep=period, centerlast, small]{caption}  % для того чтобы заменить ":" на "." после слова "рис."; подписи рисунков центрируются и печатаются размером small
+% для того чтобы заменить ":" на "." в подписи к рисункам можно перепределить команду \captionlabeldelim, т.е. \renewcommand{\captionlabeldelim}{.}
+\RequirePackage{lscape}
+\RequirePackage{flafter}  % запрещяет размешение плавающего объекта до ссылки на него
+\RequirePackage{subfigure}
+\RequirePackage{hhline}
+\RequirePackage{setspace}  % задет межстроковый интревал
+%\singlespacing
+%\onehalfspacing  % полуторный интервал
+%\doublespacing  % двойной интревал
+\RequirePackage{floatflt}
+\RequirePackage{textcomp}
+\RequirePackage{sectionbox}
+\RequirePackage{makeidx}
+\makeindex  % команда на создание индексов; обновляет перечень терминов при очередной компиляции
+
+%BEGIN--листиниги
+\RequirePackage{color}
+% определяем пользовательские цвета
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{light-gray}{gray}{0.96}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\definecolor{deepblue}{rgb}{0,0,0.5}
+\definecolor{deepred}{rgb}{0.6,0,0}
+\definecolor{deepgreen}{rgb}{0,0.5,0}
+\definecolor{deeppurple}{named}{Purple}
+%
+\RequirePackage{listings}  % для офрмления листингов программ (альтернатива, например, fancyvrb)
+\lstloadlanguages{XML,
+	Python,
+	Fortran,
+	command.com,
+	[LaTeX]TeX
+}  % поддерживаемые языки
+
+% локальные настройки подсветки синтаксиса XML Workbench
+\lstdefinestyle{xml}{% 
+	language = XML,  % базовый язык
+	keywordstyle=\color{purple},  % подсветка ключевых слов
+	% дополнительные ключевые слова
+	morekeywords = {% в XML это атрибуты
+		version, name, context, display, order, options,
+		src, caption, icon, control, userobject, type,
+	    selection\_filter, unit, location, enableGenericTransfer,
+	    priority, readonly, needupdate, visible, persistent,
+	    isparameter, keytype, valuetype, elementtype, usage, count,
+	    format, deletefiles, id, path, value, separator, caseIgnored, allowFoldOfComments, foldCompact, forcePureLC, decimalSeparator, Keywords1, Keywords2, Keywords3, Keywords4, Keywords5, Keywords6, Keywords7, Keywords8},
+	stringstyle = \color{gray}\itshape,  % стиль строк
+	morecomment=[s]{<!--}{-->},
+	tagstyle = \color{deepblue},  % определяет стиль, в котором печатаются теги XML
+	commentstyle = \color{deepgreen}\itshape  % коментарии зеленым цветом, курсив
+}
+
+% локальные настройки подсветки синтаксиса IronPython Workbench
+\lstdefinestyle{ironpython}{%
+	language = Python,  % базовый язык
+	basicstyle = \small\ttfamily,  % стиль отображения базовых элементов кода
+	keywords = {try, except, while, or,else, not, and, break, global, lambda, with, True, False, def, from, import, return, class,for,in,if,as},  % дополнительные ключевые слова
+	emph = {[2]EOFError, dir, getattr, setattr, eval, enumerate, repr, getattr, open, super, str, sum, compile, int, input, float, range, abs, print, bool, dict}, % встроенные функции Python
+	emphstyle = {[2]\color{deeppurple}}, % цвет встроенных функций Python emph = {[2] ..}
+	%identifierstyle=\color{pink},  % стиль для неключевых слов
+	keywordstyle = \color{orange},  % стиль ключевых слов
+	stringstyle = \itshape\color{mygreen},  % стиль строк
+	emphstyle = \color{blue},  % цвет идентифиакторов, которые включены в группу emph = {} в листингах
+	commentstyle = \color{red}\itshape  % коментарии зеленым цветом, курсив
+}
+
+% локальные настройки подсветки синтаксиса APDL
+\lstdefinestyle{apdl}{%
+	basicstyle = \small\ttfamily,  % стиль отображения базовых элементов кода
+	identifierstyle=\color{deeppurple},  % стиль для неключевых слов
+	keywordstyle = \color{orange},  % стиль ключевых слов
+	stringstyle = \color{mygreen},  % стиль строк
+	emphstyle = \color{blue},  % цвет идентифиакторов, которые включены в группу emph = {} в листингах
+	commentstyle = \color{red}\itshape,  % коментарии красным цветом, курсив
+	morecomment=[s]{/*}{*/},
+	keywordsprefix=/,alsoletter=/  % для выделения слеш-команд APDL
+}
+
+% локальные настройки подсветки синтаксиса Fortran 95
+\lstdefinestyle{ftn95}{%
+	language = Fortran,  % базовый язык; по умолчанию используется Fotran 95; в общем случае следует указывать версию [90]Fortran
+	basicstyle = \small\ttfamily,  % стиль отображения базовых элементов кода
+	%identifierstyle=\color{deeppurple},  % стиль для неключевых слов
+	keywordstyle = \color{deepblue},  % стиль ключевых слов
+	stringstyle = \itshape\color{mygreen},  % стиль строк
+	emphstyle = \color{blue},  % цвет идентифиакторов, которые включены в группу emph = {} в листингах
+	commentstyle = \color{red}\itshape,  % коментарии красным цветом, курсив
+}
+
+
+% локальные настройки подсветки синтаксиса LaTeX
+\lstdefinelanguage{latex}{
+	language = [LaTeX]TeX,  % базовый язык
+	sensitive=true,
+	basicstyle = \small\ttfamily, %\small\usefont{T2A}{cmtt}{sb}{sc},  % стиль отображения базовых элементов кода
+	keywords = {},
+	morekeywords = {},
+	emphstyle = \color{green},
+	keywordstyle = \color{blue},  % стиль ключевых слов
+	ndkeywordstyle=\color{orange}\bfseries,
+	stringstyle = \itshape\color{mygreen},  % стиль строк
+	commentstyle = \color{red}\itshape,  % коментарии красным цветом, курсив
+	keywordsprefix=\\,alsoletter=\\,  % для выделения бекслеш-команд LaTeX
+	literate ={%
+			{=}{{ \textcolor{orange}{=} }}1  % =
+			%{;}{{ \textcolor{red}{$;$} }}1  % ;
+			{\{}{{ \textcolor{deepred}{\{} }}1  % {
+			{\}}{{ \textcolor{deepred}{\}} }}1  % }
+			%{(}{{ \textcolor{deepgreen}{(} }}1  % (
+			%{)}{{ \textcolor{deepgreen}{)} }}1  % )
+			{[}{{ \textcolor{orange}{[} }}1  % [
+			{]}{{ \textcolor{orange}{]} }}1  % ]
+			%{>}{{ \textcolor{red}{$>$} }}1  % >
+			%{<}{{ \textcolor{red}{$<$} }}1  % <
+	}
+}
+
+% локальные настройки подсветки синтаксиса cmd
+\lstdefinelanguage{cmd}{
+	language = command.com,
+	basicstyle = \small\ttfamily,
+	keywords = {for,echo,cd,del,if,exist,else,exit,in,do},
+	keywordstyle = \color{blue},
+	keywordsprefix=\@, alsoletter=\@,
+	literate ={%
+		{=}{{ \textcolor{orange}{=} }}1  % =
+		%{(}{{ \textcolor{red}{(} }}1  % (
+		%{)}{{ \textcolor{red}{)} }}1  % )
+		{[}{{ \textcolor{orange}{[} }}1  % [
+		{]}{{ \textcolor{orange}{]} }}1  % ]
+	}
+}
+
+
+% глобальные настройки подсветки синтаксиса
+\lstset{%
+	numberbychapter=true,  % нумерация листинга по номеру главы
+	basicstyle=\small\ttfamily, % стиль отображения базовых элементов кода
+	stringstyle=\color{mymauve}\itshape,  % вид строковых выражений
+	numbers=left,  % где поставить нумерацию строк (слева\справа)
+	numberstyle=\tiny\itshape\color{gray},  % размер шрифта для номеров строк
+	stepnumber=1,  % размер шага между двумя номерами строк
+	numbersep=5pt,  % как далеко отстоят номера строк от подсвечиваемого кода
+	backgroundcolor=\color{white}, % цвет фона подсветки - используем \RequirePackage{color}
+	showspaces=false,  % показывать или нет пробелы специальными отступами
+	showstringspaces=false,  % показывать или нет пробелы в строках
+	showtabs=false,  % показывать или нет табуляцию в строках
+	frame = tlBR,  % рисовать рамку вокруг кода
+	rulesepcolor=\color{black},% создает эффект тени
+	tabsize=2,  % размер табуляции по умолчанию равен 2 пробелам
+	captionpos=t,  % позиция заголовка вверху [t] или внизу [b] 
+	breaklines=true,  % автоматически переносить строки (да\нет)
+	breakatwhitespace=false,  % переносить строки только если есть пробел
+	escapeinside={\%*}{*)},  % если нужно добавить комментарии в коде
+	morecomment=[l]{!},  % комментарии для APDL
+}
+%END--листиниги
+
+%BEGIN--типографские настройки
+\hyphenation{ги-по-те-ти-ческий об-ласть}  % настраивает перенос слов
+\righthyphenmin=2  % наименьшее количество букв, которое разрешается переносить на следующую строку
+\clubpenalty=10000  % определяет нежелательность разрыва страницы после первой строки абзаца
+\widowpenalty=10000  % определяет нежелательность разрыва страницы перед последней строкой абзаца
+%\renewcommand{\bfdefault}{b}  % чтобы жирный шрифт был менее широким
+\frenchspacing  % чтобы промежутки между словами и предложениями не отличались
+\raggedbottom  % разрешает делать короткие страницы
+%\renewcommand{\labelitemi}{$ \mathsurround = 0pt \blacksquare $}  % модификация значков в перечене
+%\renewcommand{\baselinestretch}{1.3}  % пропорционально изменяет межстроковое расстояние
+%END--типографские настройки
+
+%BEGIN--стилевые вставки-----------------------------------------------------------------------------
+% если нужно использовать команду с символом @ не в стилевом файле, а прямо в тексте документа, то используется обрамление \makeatletter--\makeatother
+\renewcommand{\@dotsep}{3.5}  % регулирует густоту точек-лидеров в Оглавлении
+\renewcommand{\@tocrmarg}{2.55em}
+\renewcommand{\@pnumwidth}{2em}  % опредеяет сколько места отводится под номер страницы в Оглавлении
+\renewcommand{\l@section}{\@dottedtocline{1}{1.5em}{2.6em}}  % задает отступ и ширину бокса под номер раздела
+\renewcommand{\l@subsection}{\@dottedtocline{2}{3.8em}{3.45em}}
+
+\renewcommand{\tableofcontents}%
+{\chapter*{\normalfont\huge\contentsname}\@starttoc{toc}}
+
+
+\renewcommand{\@listI}{%
+	\leftmargin=25pt
+	\rightmargin=0pt
+	\labelsep=5pt
+	\labelwidth=20pt
+	\itemindent=0pt
+	\listparindent=0pt
+	\topsep=8pt plus 2pt minus 4pt
+	\partopsep=2pt plus 1pt minus 1pt
+	\parsep=0pt plus 1pt
+	\itemsep=\parsep}  % определяет отступы и интервалы в перечнях
+\renewcommand{\labelitemi}{$\mathsurround=0pt \circ$}  % значек корня квадратного вместо точки
+
+% Оформление глав и параграфов
+\renewcommand{\@makechapterhead}[1]{%
+	\vspace*{35 pt}% 
+	{\parindent=0pt
+		\raggedright \normalfont\huge
+		\@chapapp{} % 
+		\thechapter \par 
+		\vspace{10 pt}
+		\normalfont\LARGE #1\par  % <<--
+		\nopagebreak 
+		\vspace{20 pt} 
+	}
+}
+
+\renewcommand{\chapter}{\cleardoublepage
+	\thispagestyle{empty}% подавить нумерацию страниц на страницах заглавий глав
+	\global\@topnum=0
+	\@afterindentfalse
+	\secdef\@chapter\@schapter}
+
+%\renewcommand{\thesection}{\Roman{section}}
+\renewcommand{\section}{\@startsection{section}{1}%
+	{\parindent}{3.5ex plus 1ex minus .2ex}%
+	{2.3ex plus.2ex}{\normalfont\Large}}  %{2.3ex plus.2ex}{\normalfont\Large\S}}
+	
+\renewcommand{\subsection}{\@startsection{subsection}{2}%
+	{\parindent}{3.5ex plus 1ex minus .2ex}%
+	{2.3ex plus.2ex}{\normalfont\large\itshape}}  % {2.3ex plus.2ex}{\normalfont\Large\S}}
+%END--стилевые вставки-----------------------------------------------------------------------------
+
+
+%BEGIN--борьба с переносами в формулах
+\binoppenalty=10000  % запрещает все разрывы строк после знаков бинарных операций
+\relpenalty=10000  % запрещает все разрывы строк после знаков бинарных отношений
+%END--борьба с переносами в формулах
+
+%BEGIN--math
+\numberwithin{equation}{section}  % нумерация уравнений не сплошная, а начинается заново в каждом разделе
+
+\newcommand{\F}[2]{#2_0\ldots#2_{#1}}  % \F{k}{x} --> x_0...x_k
+\renewcommand{\F}[2][k]{#2_0\ldots#2_{#1}}  % [k] - значение необязательного параметра #1, т.е. \F[N]{x} --> x_0...x_N
+\renewcommand{\Re}{\mathop{\mathrm{Re}}\nolimits}
+\renewcommand{\Im}{\mathop{\mathrm{Im}}\nolimits}
+\renewcommand{\tg}{\mathop{\mathrm{tg}}\nolimits}
+%\DeclareMathOperator*{\summ}{\sum\limits_{\mathit{i=}1}^{\mathit{n}}}  % определяет новую команду, а НЕ ПЕРЕОПРЕДЕЛЯЕТ существующую!
+\abovedisplayskip=0.7\abovedisplayskip  % вертикальные отбивки перед выключенной формулой
+\belowdisplayskip=1\belowdisplayskip  % вертикальные отбивки после выключенной формулой
+\abovedisplayshortskip=0.4\abovedisplayshortskip  % для случая, если формула и соседняя с ней строка текста коротки
+\belowdisplayshortskip=1\belowdisplayshortskip  % для случая, если формула и соседняя с ней строка текста коротки
+\newcommand{\bydef}{\stackrel{\mathrm{def}}{=}}
+\newcommand{\Pn}{\ensuremath{\mathbf{P}_n}\xspace}
+%END--math
+
+%BEGIN--пользовательские команды
+\newcommand{\str}[1]{c.~\pageref{#1}}
+\newcommand{\tblref}[1]{табл.~\ref{#1}}
+
+% для оформления Замечаний
+% с настройками по умолчанию: \remark{текст замечания}
+% с настройками цвеиа: \remark[red]{текст замечания}
+\newcommand{\remark}[2][black]{% black - это значение по умолчанию
+	\noindent
+	\parbox{\textwidth}{%
+		\vspace*{7pt}\par
+		\color{#1}
+		\hrule\vspace*{2pt}\hrule\vspace*{5pt}
+		{\small\itshape Замечание}\par
+		{\parindent=7mm\small#2}\vspace*{5pt}
+		\hrule\vspace*{2pt}\hrule\vspace*{5pt}
+	}\par
+}
+
+\newcommand{\dblbar}[1]{\bar{\bar{#1}}}
+
+\newcommand{\re}{\mathrm{Re}}
+
+\newcommand{\gradcel}[1]{\ensuremath{ #1\,{}^{\circ}\mathrm{C}}\xspace}  % градусы цельсия в формате \gradcel{380} --> 380 C
+
+% сокращения
+% команда \xspace вставляет пробел, если после слова нет знаков препинания
+% команда \ensuremath{text} отображает text как в текстовом, так и в математическом режимах 
+\newcommand{\xml}{\ensuremath{\mathsf{XML}}\xspace}  % xml
+\newcommand{\py}{\ensuremath{\mathsf{Python}}\xspace}  % Python
+\newcommand{\ipy}{\ensuremath{\mathsf{IronPython}}\xspace}  %IronPython
+\newcommand{\cpy}{\ensuremath{\mathsf{CPython}}\xspace}  %СPython
+\newcommand{\js}{\ensuremath{\mathsf{JScript}}\xspace}  %% JScript
+\newcommand{\Ans}{\ensuremath{\mathsf{ANSYS}}\xspace}  %% ANSYS
+\newcommand{\wb}{\ensuremath{\mathsf{ANSYS \ Workbench}}\xspace}  %% ANSYS Workbench
+\newcommand{\AnsMech}{\ensuremath{\mathsf{ANSYS \ Mechanical}}\xspace} %% ANSYS Mechanical
+\newcommand{\StStr}{\ensuremath{\mathsf{Static \ Structural}}\xspace} % DesignModeler
+\newcommand{\DM}{\ensuremath{\mathsf{DesignModeler}}\xspace} %% Static Structural
+\newcommand{\mapdl}{\ensuremath{\mathsf{MAPDL}}\xspace} %% MAPDL
+\newcommand{\extapi}{\ensuremath{\mathsf{ExtAPI}}\xspace} % ExtAPI
+\newcommand{\apdl}{\ensuremath{\mathsf{APDL}}\xspace} %% APDL
+\newcommand{\fortran}{\ensuremath{\mathsf{Fortran \ 95}}\xspace} %% Fortran 95
+\newcommand{\ftn}{\ensuremath{\mathsf{Fortran}}\xspace} %% Fortran
+\newcommand{\cudaftn}{\ensuremath{\mathsf{CUDA\ Fortran}}\xspace} %% CUDA Fortran
+\newcommand{\sqlt}{\ensuremath{\mathsf{SQLite}}\xspace} %% SQL
+
+%BEGIN--APDL
+% для справочника по командам APDL
+% 1arg--имя команды
+% 2arg--аргументы
+% 3arg--контекст применения команды
+% 4arg--комментарий
+\newcommand{\cmdApdl}[4]{%
+	\hruleApdl{begin}{#1}
+	\vspace{5mm}
+	\noindent
+	\parbox{0.95\textwidth}{%
+		\index{#1@\texttt{#1}|textit}
+		\ttfamily\textcolor{blue}{\large #1}{\large\color{black},}\textit{\color{red}\large #2}\par 
+		\textcolor{deepgreen}{\textit{\{ #4\} } }
+	}\par
+	\vspace{-\baselineskip}
+	\parbox{0.9\textwidth}{%
+		\flushright\ttfamily\footnotesize\color{deepblue}\textit{контекст} #3
+	}\par\vspace{6pt}
+}
+
+% ключ команд APDL
+% 1arg--имя ключа
+% 2arg--комментарий
+\newcommand{\cmdKeyApdl}[2]{%
+	\textit{\ttfamily\color{red}#1}\par
+	\vspace{1mm}
+	\parbox{\textwidth}{%
+		\ttfamily\itshape\color{deepgreen}
+		\{ #2\}
+	}\par\vspace{3pt}
+}
+
+% значение ключа команды APDL
+% 1arg--значение
+% 2arg--комментарий
+\newcommand{\cmdValueApdl}[2]{%
+	\hspace{5mm}
+	\parbox{\textwidth}{%
+		\ttfamily
+		#1
+	}\par
+	\vspace{2mm}\hspace{10mm}
+	\parbox{\textwidth}{%
+		\ttfamily\itshape\color{deepgreen}
+		\{ #2\}
+	}\par\vspace{6pt}
+}
+
+% Горизонтальная черта для отдления блоков описания команд APDL
+% 1arg--begin/end
+% 2arg--имя команды
+\newcommand{\hruleApdl}[2]{%
+	\noindent
+	\parbox{\textwidth}{%
+		%\color{deepgreen}
+		\small\ttfamily
+		%\rule{0.8\textwidth}{0.5pt}\vspace{6pt}\textsf{ #1}:\texttt{#2}
+		\dotfill #1:\texttt{#2}
+	}\vspace{3mm}
+}
+
+\newcommand{\commaUpApdl}[1]{{\ttfamily\upshape\color{black}#1}}
+
+%END--APDL
+
+%END--пользовательские команды
+
+%BEGIN--пользовательские переменные
+\newlength{\drop}  % пользовательская длина
+\drop = 3mm
+%END--пользовательские переменные
+
+% --------- MAC APPLE ---------
+\RequirePackage{menukeys}  % для спецсимволов mac
+\renewmenumacro{\menu}[>]{angularmenus} % default: menus
+\renewmenumacro{\directory}[>]{hyphenatepathswithfolder} % default: paths
+\renewmenumacro{\keys}{shadowedangularkeys} % default: roundedkeys
+\changemenucolor{gray}{br}{named}{black}  % border
+\changemenucolor{gray}{bg}{named}{white}  % background
+\changemenucolor{gray}{txt}{named}{blue}  % background
+% --------- MAC APPLE ---------

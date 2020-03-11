@@ -1,0 +1,603 @@
+\documentclass[%
+	11pt,
+	a4paper,
+	utf8,
+	%twocolumn
+		]{article}	
+
+\usepackage{style_packages/podvoyskiy_article_extended}
+
+
+\begin{document}
+\title{Наиболее полезные конструкции\\системы контроля версий  \texttt{Git}}
+
+\author{}
+
+\date{}
+\maketitle
+
+\thispagestyle{fancy}
+
+\tableofcontents
+
+
+\section{Термины и определения}
+
+\noindent\texttt{HEAD} -- специальный \textit{указатель} на текущую \emph{локальную ветку}, которая в свою очередь ссылается на последнее зафиксированное состояние, т.е. на \emph{последний коммит}.
+
+
+\section{Фундаментальные концепции}
+
+При \emph{слиянии} веток снчала нужно перейти в ту ветку, в которую требуется слить данные, а затем применить команду \texttt{git merge}, т.е.
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git checkout master
+git merge server
+\end{lstlisting}
+
+
+При \emph{перемещении}\footnote{Т.е. чтобы повторить изменения из одной ветки в другой} данных из одной ветки в другую следует сначала перейти в ту ветку, из которой требуется перенести данные, а затем воспользоваться \texttt{git rebase}, т.е.
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git checkout experiment
+git rebase master
+\end{lstlisting}
+
+
+Общая схема работы в небольшой команде:
+\begin{itemize}
+	\item Некоторое время вы работаете в тематической ветке (например, \texttt{issue54}), и когда приходит время, сливаете результаты своего труда в ветку \texttt{master}
+	
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git checkout master
+git merge issue54
+\end{lstlisting}
+	
+	\item Решив, что пришло время поделиться своими наработками с коллегами, вы скачиваете данные с сервера (\texttt{git fetch origin}), и если там появились изменения, сливаете к себе ветку \texttt{origin/master}, т.е. \texttt{git merge origin/master},
+	
+	\item После чего содержимое ветки \texttt{master} можно отправить на сервер \texttt{git push origin master}.
+\end{itemize}
+
+
+
+\section{Конструкции \texttt{Git}}
+
+\subsection{Добавление файлов в область индексирования}
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git add file_name.py
+git add .
+\end{lstlisting}
+
+
+\subsection{Фиксация изменений}
+
+Зафиксировать измененное состояние
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git commit -m 'Initial commit'
+\end{lstlisting}
+
+Зафиксировать измененное состояние, пропустив область индексирования
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git commit -a -m 'Some comment'
+\end{lstlisting}
+
+Исправить комментарий коммита. Комментарий последнего коммита будет перезаписан
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git commit -m 'New some comment' --amend
+\end{lstlisting}
+
+
+\subsection{Удаление файлов}
+
+Удалить файл из \emph{области индексирования} и заодно удалить указанный файл из рабочей папки. Чтобы система \texttt{Git} перестала работать с файлом, его нужно удалить из числа отслеживаемых (точнее, убрать из области индексирования) и зафиксировать данное изменение 
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+$ git rm file_name.py
+\end{lstlisting}
+
+
+Удалить файл из области индексирования\footnote{\texttt{Git} перестает следить за файлом, т.е. он становится \emph{неотслеживаемым}!}, но оставить его в рабочей папке. Данная команда в отличие от \texttt{git reset HEAD file\_name.py} может использоваться как до первой фиксации (\texttt{git commit}), так и после
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git rm --cached file_name.py
+\end{lstlisting}
+
+
+Удалить все файлы с расширением \texttt{.log}\footnote{Символ \texttt{*} экранируется} из директории \texttt{log/}
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git rm log/\*.log
+\end{lstlisting}
+
+
+\subsection{Переименование файлов}
+
+Переименовать файл
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git mv old_file_name new_file_name
+\end{lstlisting}
+
+
+Переименовать файл с использованием \texttt{\{..\}}
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git mv test_file{,_new}.py
+\end{lstlisting}
+
+
+\subsection{Просмотр истории коммитов}
+
+Вывести историю коммитов
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git log
+\end{lstlisting}
+
+
+Вывести историю коммитов, ограничившись последними двумя, с указанием разницы, которую внес каждый коммит
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git log -p -2
+\end{lstlisting}
+
+Вывести историю коммитов с краткой статистикой
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git log --stat
+\end{lstlisting}
+
+Вывести историю коммитов с указанием сокращенного варианта хеш-кода коммита и комментария
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git log --pretty=format:'%h %s'
+\end{lstlisting}
+
+
+Вывести историю коммитов за последние 2 недели
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git log --since=2.week
+\end{lstlisting}
+
+
+Вывести историю коммитов с захватом интересующего слова в коммите, ограничившись последними двумя
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git log --grep='key word' -2
+\end{lstlisting}
+
+
+Вывести историю коммитов, которые попали в заданный временной диапазон
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git log --since='2020-03-01 10:00' --before ='2020-03-01 11:00'
+\end{lstlisting}
+
+
+Вывести историю коммитов с указанием сокращенного хеш-кода коммита, тегов, текущей векти и собственно коммита
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git log --oneline
+\end{lstlisting}
+
+
+Вывести историю коммитов, показывая места расположения указателей и точек расхождения
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git log --oneline --decorate --all --graph
+\end{lstlisting}
+
+Отобразить только те не подвергавшиеся слиянию коммиты из ветки \texttt{origin/master}, которых нет в ветке \texttt{issue54}
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git log --no-merges issue54..origin/master
+\end{lstlisting}
+
+
+\subsection{Отмена индексирования}
+
+Отменить индексирование файла (файл удаляется из области индексирования). Данная команда может применяться только после первой фиксации (\texttt{git commit})
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git reset HEAD file_name.py
+\end{lstlisting}
+
+
+\subsection{Работа с удаленными репозиториями}
+
+Добавить удаленный репозиторий под коротким именем \texttt{pb}. Теперь вместо полного URL можно использовать имя \texttt{pb}
+
+\begin{lstlisting}[
+numbers = none
+]
+git remote add pb https://github.com/paulboone/ticgit
+\end{lstlisting}
+
+
+\emph{Извлечь данные} из удаленного репозитория. Эта команда связывается с удаленным проектом и извлекает оттуда все пока отсутствующие в локальном репозитории данные. Она \emph{\color{red}не выполняет} автоматического слияния с ветками, и вообще никак не затрагивает эти ветки
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git fetch origin
+\end{lstlisting}
+
+
+Отправить данные локальной ветки \texttt{master} на удаленный репозиторий \texttt{origin}
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git push origin master
+\end{lstlisting}
+
+
+Передать данные от локальной ветки \texttt{serverfix} в ветку \texttt{awesomebranch} на удаленном репозитории
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git push origin serverfix:awesomebranch
+\end{lstlisting}
+
+Вывести информацию о конкретном удаленном репозитории \texttt{origin}
+
+\begin{lstlisting}[
+numbers = none
+]
+git remote show origin
+\end{lstlisting}
+
+
+Изменить имя удаленного репозитория с \texttt{pb} на \texttt{paul}. Теперь к ветке \texttt{pb/master} нужно будет обращаться по имени \texttt{paul/master}
+
+\begin{lstlisting}[
+numbers = none
+]
+git remote rename pb paul
+\end{lstlisting}
+
+
+Удалить ссылку на удаленный репозиторий
+
+\begin{lstlisting}[
+numbers = none
+]
+git remote rm paul
+\end{lstlisting}
+
+
+\subsection{Работа с тегами}
+
+Вывести список доступных тегов
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git tag
+\end{lstlisting}
+
+
+Вывести список тегов, отвечающих поисковому  шаблону
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git tag -l 'v1.8.*'
+git tag -l 'v0.2*.*'
+\end{lstlisting}
+
+
+Создать тег с комментарием. Тег привязывается к последнему коммиту
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git log -a v1.4 -m 'My version 1.4'
+\end{lstlisting}
+
+Вывести информацию по тегу
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git show v1.4
+\end{lstlisting}
+
+
+Создать легковесный тег (просто не указываются \texttt{-a}, \texttt{-s}, \texttt{-m})
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git tag v1.4-lw
+\end{lstlisting}
+
+
+Отправить все теги на удаленный репозиторий. По умолчанию команда \texttt{git push} не отправляет теги на удаленный репозиторий
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git push origin --tags
+\end{lstlisting}
+
+
+\subsection{Работа с ветками}
+
+Вывести список существующих веток
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git branch
+\end{lstlisting}
+
+
+Создать новую ветку
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git branch testing
+\end{lstlisting}
+
+Переключиться на новую ветку
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git checkout testing
+\end{lstlisting}
+
+Создать новую ветку и тут же переключитсья на нее
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git checkout -b iss53
+\end{lstlisting}
+
+
+Внедрить внесенные изменения в готовый код
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git merge hotfix
+\end{lstlisting}
+
+Удалить ветку 
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git branch -d hotfix
+\end{lstlisting}
+
+Вывести ветки, НЕ объединенные с текущей веткой
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git branch --no-marged
+\end{lstlisting}
+
+
+Создать \emph{локальную копию ветки} \texttt{serverfix} на основе \emph{удаленной ветки} \texttt{origin/serverfix}. В результате будет получена локальная ветка, которая начинается там же, где и ветка \texttt{origin/serverfix}
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git checkout -b serverfix origin/serverfix
+\end{lstlisting}
+
+\noindent или альтернативный вариант
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git checkout --track origin/serverfix
+\end{lstlisting}
+
+Создать локальную копию ветки с именем \texttt{sf} на основе удаленной ветки \texttt{origin/serverfix}. Теперь локальная ветка \texttt{sf} поддерживает автоматический обмен данными с удаленной веткой \texttt{origin/serverfix}
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git checkout -b sf origin/serverfix
+\end{lstlisting}
+
+
+Для обращения к существующей ветке можно использовать краткую форму \texttt{@\{u\}}. К примеру, если мы следим из ветки \texttt{master} за веткой \texttt{origin/master}, то для краткости можно писать так
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git merge @{u}
+\end{lstlisting}
+вместо
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git merge origin/master
+\end{lstlisting}
+
+Вывести список веток \emph{наблюдения}. Все цифры представляют собой показатели, зафиксированные в момент последнего скачивания данных с каждого сервера. Данная команда не обращается к серверам, а просто сообщает локальные данные из кэша. Для получения актуальной информации о количестве новых коммитов на локальных и удаленных ветках следует извлечь данные со всех удаленных серверов и только затем воспользоваться этой командой, т.е.
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git fetch --all
+git branch -vv
+ iss53 7e424c3 [origin/iss53: ahead 2] forgot the brackets
+ master 1ae2a45 [origin/master] deploying index fix
+ serverfix 5ea463a [teamone/server-fix-good: ahead 3, behind] this should do it
+ ...
+\end{lstlisting} 
+
+
+\subsection{Отправка данных на удаленный репозиторий}
+
+Для того чтобы отправить данные из локального репозитория на удаленный следует использовать конструкцию
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git push origin master
+\end{lstlisting}
+
+\noindent но предварительно необходимо слить данные из удаленного репозитория с помощью команды
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git pull origin master --allow-unrelated-histories
+\end{lstlisting}
+
+
+\subsection{Перемещение данных}
+
+Изменения, зафиксированные в одной ветке, повторить в другой ветке (в \texttt{Git} это называется \emph{перемещением}). Например, чтобы повторить изменения из ветки \texttt{experiment} в ветке \texttt{master}, следует сначала перейти в ту ветку, из которой требуется перенести изменения (ветка \texttt{experiment}), а затем воспользоваться командой \texttt{git rebase}\footnote{Работает это следующим образом: ищется общий предок двух веток (текущей ветки и ветки, в которую выполняется перемещение), вычисляется разница, вносимая каждым коммитом текущей ветки, и сохраняется во временных файлах. После этого текущая ветка сопоставляется тому же коммиту, что и ветка, в которую осуществляется перемещение, и одно за другим происходят все изменения}
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git checkout experiment
+git rebase master
+\end{lstlisting}
+
+
+Внести изменения клиентской части (ветка \texttt{client}) в окончательную версию кода (ветка \texttt{master}), оставив изменения серверной части (ветка \texttt{server}) для дальнейшего тестирования. Другими словами, взять изменения клиентской части, не связанные с изменениями на серверной стороне, и воспроизвести их в ветке \texttt{master} можно следующим образом\footnote{По сути, команда приказывает <<перейти в ветку \texttt{client}, найти исправления от общего предка веток \texttt{client} и \texttt{server} и повторить их в ветке \texttt{master}>>}
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git rebase --onto master server client
+\end{lstlisting}
+
+Переместить изменения из ветки \texttt{server} в ветку \texttt{master}, вне зависимости от того, в какой ветке вы находитесь, позволяет команда \texttt{git rebase [main\_branch] [topic\_branch]}. Эта команда переключает на тематическую ветку (в данном случае -- на ветку \texttt{server}) и воспроизводит ее содержимое в основной ветке (\texttt{master})
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git rebase master server
+\end{lstlisting}
+
+\remark{%
+    При перемещении изменений из одной ветки в другую, нужно перейти на ту ветку, \emph{из которой} планируется переместить изменения
+}
+
+
+
+
+
+
+
+% Источники в "Газовой промышленности" нумеруются по мере упоминания 
+\begin{thebibliography}{99}\addcontentsline{toc}{section}{Список литературы}
+	\bibitem{  }{  }
+\end{thebibliography}
+
+%\listoffigures\addcontentsline{toc}{section}{Список иллюстраций}
+
+\end{document}
