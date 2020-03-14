@@ -9,24 +9,31 @@
 	bottom=2cm
 		]{geometry}
 \RequirePackage{multicol}
-%\RequirePackage{hyperref}
-\RequirePackage[
-    pdftex,
-	unicode,
-	colorlinks,
-	linkcolor=blue,
-	citecolor=red,
-	bookmarksopen,
-	pdfhighlight=/N
-		]{hyperref}  % поддержка гиперссылок
+\RequirePackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+}
+%\RequirePackage[
+%    pdftex,
+%	unicode,
+%	colorlinks,
+%	linkcolor=blue,
+%	citecolor=red,
+%	bookmarksopen,
+%	pdfhighlight=/N
+%		]{hyperref}  % поддержка гиперссылок
 \RequirePackage{url}
 \RequirePackage[svgnames]{xcolor} % Required to specify font color
 \RequirePackage{graphicx}
 \RequirePackage{color}
+\RequirePackage{colortbl}  % настраивает цвет таблицы
 \RequirePackage{textcomp}
 % определяем пользовательские цвета
 \definecolor{mygreen}{rgb}{0,0.6,0}
-\definecolor{light-gray}{gray}{0.94}
+\definecolor{light-gray}{gray}{0.97}
 \definecolor{mymauve}{rgb}{0.58,0,0.82}
 \definecolor{deepblue}{rgb}{0,0,0.5}
 \definecolor{deepred}{rgb}{0.6,0.1,0}
@@ -98,10 +105,10 @@
 	\leftmargin=25pt
 	\rightmargin=0pt
 	\labelsep=5pt
-	\labelwidth=20pt
+	\labelwidth=8pt
 	\itemindent=0pt
 	\listparindent=0pt
-	\topsep=8pt plus 2pt minus 4pt
+	\topsep=2pt plus 2pt minus 4pt
 	\partopsep=2pt plus 1pt minus 1pt
 	\parsep=0pt plus 1pt
 	\itemsep=\parsep}  % определяет отступы и интервалы в перечнях
