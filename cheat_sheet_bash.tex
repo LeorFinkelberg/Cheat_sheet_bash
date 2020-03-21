@@ -32,7 +32,7 @@ numbers = none
 find / -type f -mtime -l ! -name '*.o'
 \end{lstlisting}
 
-Вывод имен файлов и удаление файлов с именами \texttt{core} и \texttt{junk} из рабочего каталога и всех его подкаталогов (круглые скобки обязательно отделяются пробелами)
+Вывод имен файлов и удаление файлов с именами \texttt{core} или \texttt{junk} из рабочего каталога и всех его подкаталогов (круглые скобки обязательно отделяются пробелами)
 
 \begin{lstlisting}[
 language = cmd,
@@ -122,8 +122,13 @@ numbers = none
 find . -maxdepth 1 -name '*.py' | xargs grep -inE 
 \end{lstlisting} 
 
-
-
+Найти в файлах с расширением \texttt{*.tex} строку \texttt{'section'} без учета регистра и вывести три строки контекста
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+find . -name '*.tex' | xargs grep -iE 'section' -3
+\end{lstlisting}
 
 % Источники в "Газовой промышленности" нумеруются по мере упоминания 
 \begin{thebibliography}{99}\addcontentsline{toc}{section}{Список литературы}
