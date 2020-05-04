@@ -110,7 +110,7 @@ ls -l *.py | grep -iE 'spark'
 language = cmd,
 numbers = none
 ]
-find . -maxdepth 1 -name '*.py' -exec grep -iE 'argparse' {} \;
+find . -maxdepth 1 -name '*.py' -exec grep -inE 'argparse' {} \;
 \end{lstlisting}
 
 Альтернативный вариант с использованием \texttt{xargs} (работает значительно быстрее варианта с \texttt{-exec})
@@ -119,7 +119,7 @@ find . -maxdepth 1 -name '*.py' -exec grep -iE 'argparse' {} \;
 language = cmd,
 numbers = none
 ]
-find . -maxdepth 1 -name '*.py' | xargs grep -inE 
+find . -maxdepth 1 -name '*.py' | xargs grep -inE 'argparse'
 \end{lstlisting} 
 
 Найти в файлах с расширением \texttt{*.tex} строку \texttt{'section'} без учета регистра и вывести три строки контекста
@@ -130,6 +130,14 @@ numbers = none
 find . -name '*.tex' | xargs grep -iE 'section' -3
 \end{lstlisting}
 
+Вывести список пакетов, в именах которых встречается подстрока \texttt{'python'} с контекстом \texttt{'sql'}
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+conda list | grep -inE 'python.*sql'
+\end{lstlisting}
+
 Получить информацию о доступном метсе на диске
 \begin{lstlisting}[
 language = cmd,
@@ -137,6 +145,33 @@ numbers = none
 ]
 df -h
 \end{lstlisting}
+
+\subsection{Переадресация ввода-вывода}
+
+Перенаправить \emph{стандартный поток вывода} данных (дескриптор файла 1) и \emph{стандартный поток вывода ошибок} (дескриптор файла 2), которые возвращает \texttt{conda} с захватом всех пакетов, в именах которых встречается подстрока \texttt{'python'}, в файл с именем \texttt{test\_file.log} (временный поток вывода данных \texttt{\&1}). Если команда вернет ошибку, то сообщение ошибки перепишет содержимое файла \texttt{test\_file.log}
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+conda list | grep -inE 'python' > test_file.log 2>&1
+\end{lstlisting}
+
+Более короткий вариант рассмотренной выше конструкции
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+conda list | grep -inE 'python' &> test_file.log
+\end{lstlisting}
+
+Присоединить стандартный поток вывода данных и стандартный поток вывода ошибок к содержимому файла. Конструкция \texttt{rm df} возвращает сообщение об ошибке <<\texttt{rm: cannot remove 'df': No such file or directory}>>, которое можно добавить в файл
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+rm df &>> test_file.txt
+\end{lstlisting}
+
 
 
 % Источники в "Газовой промышленности" нумеруются по мере упоминания 
