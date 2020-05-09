@@ -172,6 +172,52 @@ numbers = none
 rm df &>> test_file.txt
 \end{lstlisting}
 
+Вывести размер директорий в Мегабайтах (\texttt{M})
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+du -BM
+\end{lstlisting}
+
+Вывести итоговый размер директории (\texttt{c}) в Мегабайтах (\texttt{M})
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+du -cBM
+\end{lstlisting}
+
+Перевести размеры директорий в понятный человеку формат
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+du -h
+\end{lstlisting}
+
+Вывести информацию об указанной директории в дружественном формате
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+du -sh style_packages/
+\end{lstlisting}
+
+Вывести размер папок текущей директории, не погружаясь глубже корневых папок
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+du -h -d 1
+\end{lstlisting}
+или так
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+du --max-depth=1 -h
+\end{lstlisting}
 
 
 % Источники в "Газовой промышленности" нумеруются по мере упоминания 
