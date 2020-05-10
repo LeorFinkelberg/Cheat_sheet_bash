@@ -146,6 +146,39 @@ numbers = none
 df -h
 \end{lstlisting}
 
+Скачать файл с тем же именем, что на удаленном репозитории 
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+curl -O http://merionet.ru/yourfile.tar.gz
+\end{lstlisting}
+
+Скачать файл с удаленного репозитория с новым именем и/или путем
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+curl -o newfile.tar.gz http:// merionet.ru /yourfile.tar.gz
+\end{lstlisting}
+
+Возобновить прерванную загрузку с того места, где она остановилась
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+curl -C - -O http://merionet.ru/yourfile.tar.gz
+\end{lstlisting}
+
+Скачать несколько файлов 
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+curl -O http://merionet.ru/info.html -O http://wiki.merionet.ru/about.html
+\end{lstlisting}
+
+
 \subsection{Переадресация ввода-вывода}
 
 Перенаправить \emph{стандартный поток вывода} данных (дескриптор файла 1) и \emph{стандартный поток вывода ошибок} (дескриптор файла 2), которые возвращает \texttt{conda} с захватом всех пакетов, в именах которых встречается подстрока \texttt{'python'}, в файл с именем \texttt{test\_file.log} (временный поток вывода данных \texttt{\&1}). Если команда вернет ошибку, то сообщение ошибки перепишет содержимое файла \texttt{test\_file.log}
