@@ -9,7 +9,7 @@
 
 
 \begin{document}
-\title{Наиболее полезные конструкции командной оболочки Bash}
+\title{Практика использования и наиболее полезные конструкции командной оболочки \texttt{bash}}
 
 \author{}
 
@@ -18,8 +18,49 @@
 
 \thispagestyle{fancy}
 
-%\tableofcontents
+\tableofcontents
 
+\section{Сценарии командной оболочки \texttt{bash}}
+
+Для того чтобы успешно создать и запустить сценарий командной оболочки требуется:
+\begin{enumerate}
+	\item Написать сценарий,
+	
+	\item Сделать сценарий исполняемым,
+	
+	\item Поместить сценарий в каталог, где командная оболочка сможет найти его.
+\end{enumerate}
+
+Простой пример в качестве иллюстрации
+\begin{lstlisting}[
+style = bash,
+title = {\sffamily bash\_test.sh},
+numbers = none
+]
+#!/bin/bash
+echo "This is number of command line args: $#"
+\end{lstlisting}
+
+Теперь нужно сделать этот файл исполняемым
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ chmod +x bash_test.sh
+$ ls -l bash_test.sh
+# выведет
+# -rwxr-xr-x 1 ADM 197121 31 май 19 02:55 bash_test.sh*
+\end{lstlisting}
+
+Теперь можно вызывать этот скрипт
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ ./bash_test.sh 10 20
+# выведет
+# This is number of command line args: 2
+\end{lstlisting}
 
 \section{Конструкции оболочки bash}
 
