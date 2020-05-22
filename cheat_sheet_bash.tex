@@ -236,16 +236,24 @@ _EOF_
 
 К слову, для того чтобы заменить \verb|$name| на \verb|${name}| в сценарии можно воспользоваться такой конструкцией
 \begin{lstlisting}[
+style =bash,
 numbers = none
 ]
 :%s/>\$\(.*\)</>${\1}</c
+------------------------
+:%s  # произвести замену во всех строках файла
+   /  # разделитель
+    >\$\(.*\)<  # поисковый шаблон; например, >$TITLE<
+              /  # разделитель
+               >${\1}<  # шаблон подстановки
+                      /c  # замена с подтверждением по каждому совпадению
 \end{lstlisting}
 
 Эта конструкция ищет совпадение с шаблоном во \emph{всех} строках сценария (\verb|%|). Подшаблон \verb|>\$\(.*\)<| совпадает, например, с подстрокой \verb|>$TITLE<|, и при этом \texttt{TITLE} попадает в группу №1 (к ней можно обращаться как \verb|\1|). Теперь можно \verb|>$TITLE<| заменить на \verb|>${\1}<|. Эта часть шаблона воспринимается <<как есть>>, т.е. ничего дополнительно экранировать не нужно. Параметр \texttt{c} требует подтверждение замены каждый раз, когда находит подстроку отвечающую поисковому шаблону.
 
 На роль индикатора была выбрана строка \verb|_EOF_|, и она отмечает конец встроенного текста. Строка-индикатор должна находиться в отдельной строке, одна, и за ней не должно следовать никаких пробелов.
 
-Если заменить оператор перенаправления \verb|<<| на \verb|<<-|, то командная оболочка будет игнорировать начальные символы табуляции во встроенном документе. Благодаря этому во встроенный документ можно добавить отступы для большей удобочитаемости
+Если заменить оператор перенаправления \verb|<<| на \verb|<<-|, то командная оболочка будет игнорировать начальные символы табуляции во встроенном документе. Для того чтобы блок встроенного документа работал корректно для форматирования тела блока необходимо использовать только ТАБУЛЯЦИЮ, поэтому в \texttt{Vim} придется отключить преобразование табуляции в пробелы (закомментировать строку \verb|set expandtab|). Благодаря этому во встроенный документ можно добавить отступы для большей удобочитаемости
 \begin{lstlisting}[
 style = bash,
 numbers = none
@@ -257,15 +265,51 @@ FTP_PATH=/debian/dists/lenny/main/installer-i386/current/images/cdrom
 REMOTE_FILE=debian-cd_info.tar.gz
 
 ftp -n <<- _EOF_
-    open $FTP_SERVER
-    user anonymous me@linuxbox
-    cd $FTP_PATH
-    hash
-    get $REMOTE_FILE
-    bye
-    _EOF_
+    open $FTP_SERVER            # здесь строго ТАБУЛЯЦИЯ!
+    user anonymous me@linuxbox  # здесь строго ТАБУЛЯЦИЯ!
+    cd $FTP_PATH                # здесь строго ТАБУЛЯЦИЯ!
+    hash                        # здесь строго ТАБУЛЯЦИЯ!
+    get $REMOTE_FILE            # здесь строго ТАБУЛЯЦИЯ!
+    bye                         # здесь строго ТАБУЛЯЦИЯ!
+    _EOF_                       # здесь строго ТАБУЛЯЦИЯ!
 ls -l $REMOTE_FILE
 \end{lstlisting}
+
+Еще можно перенаправлять вывод, организованный с помощью \verb|<<-|, в файл
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+#!/bin/bash
+
+USER="leor.finkelberg"
+
+report_home_space () {
+    if [[ $(id -u) -eq 0 ]]; then
+        cat <<- _EOF_ > ./contfile.txt  # <- NB          # здесь строго ТАБУЛЯЦИЯ!
+            <H2>Home Space Utilization (All Users)</H2>  # здесь строго ТАБУЛЯЦИЯ!
+            <PRE>$(du -sh .)</PRE>                       # здесь строго ТАБУЛЯЦИЯ!
+            _EOF_                                        # здесь строго ТАБУЛЯЦИЯ!
+...
+\end{lstlisting}
+
+Конструкция \verb|cat <<- _EOF_ > ./contfile.txt| перезаписывает файл \texttt{contfile.txt} при каждом запуске сценария. Если требуется <<дозаписать>> файл, то следует использовать конструкцию \verb|cat <<- _EOF_ >> ./contfile.txt|.
+
+Можно вывод команды \texttt{cat} направить как в стандартный поток вывода (терминал), так и в файл с помощью команды \texttt{tee}\footnote{Утилита \texttt{tee} копирует стандартный ввод на стандартный вывод, а также в один или несколько файлов \cite{sobel:linux-2011}}
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+report_home_space () {
+    if [[ $(id -u) -eq 0 ]]; then
+        cat <<- _EOF_ | tee ./contfile.txt  # <- NB
+                ...
+                _EOF_
+    ...
+}
+\end{lstlisting}
+
+Без ключей утилита \texttt{tee} переписывает файл вывода, если они существуют, и реагирует на прерывания. Ключ \verb|-a| заставляет утилиту добавлять вывод к существующим файлам вместо их переписывания.
 
 \subsection{Функции}
 
@@ -326,6 +370,9 @@ funct_1 () {
     foo=1
     echo "funct_1: foo = $foo"
 }
+
+# для вызова функции
+funct_1
 \end{lstlisting}
 
 Локальные переменные объявляются добавлением слова \texttt{local} перед именем переменной. В результате создается переменная, локальная по отношению к функции, в которой она определена. Когда выполнение выйдет за пределы функции, переменная перестанет существовать.
@@ -337,12 +384,14 @@ numbers = none
 ]
 report_disk_space () {
     cat <<- _EOF_
-        <H2>Disk Space Utilization</H2>
-        <PRE>$(df -h)</PRE>
-        _EOF_
+        <H2>Disk Space Utilization</H2>  # здесь строго ТАБУЛЯЦИЯ!
+        <PRE>$(df -h)</PRE>              # здесь строго ТАБУЛЯЦИЯ!
+        _EOF_                            # здесь строго ТАБУЛЯЦИЯ!
     return
 }
 
+# вызов функции
+report_disk_space
 \end{lstlisting}
 
 Она получает информацию о дисковом пространстве с помощью команды \verb|df -h|.
@@ -537,6 +586,245 @@ if [[ ($INT -gt 0) && $(($INT % 2)) -eq 0 ]]; then
     echo ...
 \end{lstlisting}
 
+Узнать имеет ли текущий пользователь права на чтение всех домашних каталогов можно следующим образом
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+USER="leor.finkelberg"
+
+report_home_space () {
+    if [[ $(id -u) -eq 0 ]]; then
+        cat <<- _EOF_
+            <H2>Home Space Utilization (All Users)</H2>  # здесь строго ТАБУЛЯЦИЯ!
+            <PRE>$(du -sh .)</PRE>                       # здесь строго ТАБУЛЯЦИЯ!
+            _EOF_                                        # здесь строго ТАБУЛЯЦИЯ!
+    else
+        cat <<- _EOF_
+            <H2>Home Space Utilization ($USER)</H2>      # здесь строго ТАБУЛЯЦИЯ!
+            <PRE>$(du -sh $HOME)</PRE>                   # здесь строго ТАБУЛЯЦИЯ!
+            _EOF_                                        # здесь строго ТАБУЛЯЦИЯ!
+    fi
+    return    
+}
+
+report_home_space
+\end{lstlisting}
+
+\subsection{Чтение и ввод с клавиатуры}
+
+Команда \texttt{read} используется для чтения единственной строки со стандартного ввода. Синтаксис
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+read [-parameters] [var ...]
+\end{lstlisting}
+
+Если имя переменной не указано, строка с данными сохраняется в переменную \texttt{REPLY}.
+
+Например, для того чтобы пользователь мог задать имя файла, в который сценарий будет перенаправлять вывод \verb|<<-|, можно воспользоваться ключом \texttt{-r}
+
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+#!/bin/bash
+
+read -p "Enter filename: " filename  # <-
+
+report_home_space () {
+    if [[ $(id -u) -eq 0 ]]; then
+        cat <<- _EOF_ | tee ./$filename  # <-
+            ...
+        _EOF_
+    ...
+}
+\end{lstlisting}
+
+Еще один простой пример
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+#!/bin/bash
+
+# читает пользовательский ввод
+read -p "Enter integer number: " int
+
+if [[ "$int" =~ ^-?[[:digit:]]+$ ]]; then
+    if [ $int -eq 0 ]; then
+        echo "$int is zero."
+    else
+        if [ $int -lt 0 ]; then 
+            echo "$int is negative."
+        else
+            echo "$int is positive."
+        fi
+        if [ $((int % 2)) -eq 0 ]; then
+            echo "$int is even."
+        else
+            echo "$int is odd."
+        fi
+    fi
+else
+    echo "Input value is not an integer." >&2
+    exit 1
+fi
+\end{lstlisting}
+
+Для того чтобы прочитать несколько значений, следует воспользоваться такой конструкцией
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+read -p "Enter one or more values > " var1 var2 var3 var4 var5
+
+echo "var1 = '$var1'"
+echo "var2 = '$var2'"
+echo "var3 = '$var3'"
+echo "var4 = '$var4'"
+echo "var5 = '$var5'"
+\end{lstlisting}
+
+С помощью ключа \verb|-s| можно скрывать символы при вводе, а с помощью ключа \verb|-t| устанавливать время ожидания на ввод. Например
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+if read -t 10 -sp "Enter secret passphrase > " secret_pass; then
+    echo -e "\nSecret passphrase = '$secret_pass'" 
+    # флаг -e нужен для интерпретации управляющей последовательности
+...
+\end{lstlisting}
+
+Здесь пользователю предлагается ввести секретный пароль за отведенные 10 сек. Если в течение этого времени ввод не был завершен, сценарий завершается с кодом ошибки. Поскольку в команду включен параметр \verb|-s|, символы пароля не выводятся на экран в процессе ввода.
+
+\subsection{Выделение полей в строке ввода с помощью IFS}
+
+Обычно командная оболочка выполняте разбиение ввода на слова перед передачей его команде \texttt{read}. Слова во вводе, разделенные одним или несколькими пробелами, становятся отдельными значениями и присваиваются командой \texttt{read} разным переменным.
+
+Такое поведение командной оболочки регулируется переменной \texttt{IFS} (Internal Field Separator). По умолчанию переменная \texttt{IFS} хранит символы пробела, табуляции и перевода строки, каждый из которых может служить разделителем полей.
+
+Изменяя значение переменной \texttt{IFS}, можно управлять делением ввода на поля перед передачей команде \texttt{read}. Например, пусть файл \verb|/etc/passwd| хранит строки данных, в которых поля отделяются друг от друга двоеточием. Присвоив переменной \texttt{IFS} значение, состоящее из единственного двоеточия, можно с помощью \texttt{read} прочитать содержимое \verb|/etc/passwd| и благополучно разделить строки на поля для присваивания разным переменным. Ниже приводится сценарий, который именно так и действует
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+#!/bin/bash
+
+# файл должен существовать до обращения и иметь
+# содержание вида Leor:100:34345:Leor Finkelberg:~:bash
+FILE="./passwd.txt"
+
+# строка-приглашение
+read -p "Enter a username > " user_name  # вводим, например, leor
+
+# благодаря флагу `-i` имя пользователя можно задавать в нижнем регистре
+# подстановка $user_name отрабатывает раньше, чем поиск по регулярному выражению
+file_info=$(grep -iE "^$user_name:" $FILE)  # одна единственная строка из файла ./passwd.txt
+
+if [[ -n "$file_info" ]]; then  # если строка непустая, то...
+    IFS=":" read user pw uid gid name home shell <<< "$file_info"  # <-
+    echo "User = '$user'"
+    echo "UID = '$uid'"
+    echo "GID = '$gid'"
+    echo "Full Name = '$name'"
+    echo "Home Dir. = '$home'"
+    echo "Shell = '$shell'"
+else
+    echo "No such user '$user_name'" >&2
+    exit 1
+fi
+\end{lstlisting}
+
+Командная оболочка позволяет выполнять в одной строке одно или несколько операций присваивания значений переменным непосредственно \emph{перед} командной, на поведение которой эти переменные влияют. Они \emph{изменяют окружение}, в котором выполняется команда. Действие этих операций присваивания ности \emph{временный} характер, окружение изменяется только на время выполнения команды. В данном случае в переменной \texttt{IFS} сохраняет символ двоеточия.
+
+То же самое можно выразить иначе
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+OLD_IFS="$IFS"
+IFS=":"
+read user pw uid gid name home shell <<< "$file_info"
+IFS="$OLD_IFS"
+\end{lstlisting}
+
+Очевидно, что размещение операции присваивания перед командой позволяет получить более компактный код, действующий точно так же.
+
+Оператор \verb|<<<| отмечает \emph{встроенную строку}. Встроенную строку (here string) простирается только до конца текущей строки кода. В данном примере строка из файла подается на стандартный ввод команды \texttt{read}.
+
+Вот несколько любопытных примеров работы со встроенной строкой
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ string="This is a string of words."
+$ read -r -a words <<< "$string"
+$ echo "${words[0]}"  # This
+$ echo "${words[1]}"  # is
+...
+\end{lstlisting}
+
+\subsection{Проверка ввода}
+
+Далее приводится пример программы, проверяющий входные данные разного вида
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+#!/bin/bash
+
+clear  # очистить экран перед началом работы программы
+
+invalid_input () {
+    echo "Invalid input '$REPLY'" >&2
+    exit 1
+}
+
+# переменная явно не указана, поэтому
+# пользовательский ввод будет связан с переменной REPLY
+read -p "Enter a single item > "
+
+# пустой ввод (недопустимо!); если строка пустая, то вызывается функция `invalid_input`
+[[ -z $REPLY ]] && invalid_input
+# если в переданной строке более одного слова, вызывать функцию `invalid_input`
+# ((...)) -> [true|false]
+(( $(echo $REPLY | wc -w) > 1 )) && invalid_input
+
+# введено допустимое имя файла
+if [[ $REPLY =~ ^[-[:alnum:]\._]+$ ]]; then
+    echo "'$REPLY' is a valid filename."
+    if [[ -e $REPLY ]]; then
+        echo "And file '$REPLY' exists."
+    else
+        echo "However, file '$REPLY' does not exists."
+    fi
+
+    if [[ $REPLY =~ ^-?[[:digit:]]*\.[[:digit:]]+$ ]]; then
+        echo "'$REPLY' is a floating point number."
+    else
+        echo "'$REPLY' is not a floating point number."
+    fi
+
+    if [[ $REPLY =~ ^-?[[:digit:]]+$ ]]; then
+        echo "'$REPLY' is an integer."
+    else
+        echo "'$REPLY' is not an integer."
+    fi
+else
+    echo "The string '$REPLY' is not a valid filename."
+fi
+\end{lstlisting}
+
+Для проверки числа слов в пользовательском вводе с тем же результатом можно было бы использовать и конструкцию
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+[[ $(echo "$REPLY" | wc -w) -gt 1 ]] && invalid_input
+\end{lstlisting}
 
 
 \section{Полезные конструкции оболочки \texttt{bash}}
@@ -729,6 +1017,14 @@ language = cmd,
 numbers = none
 ]
 find . -name '*bash*.tex' | xargs grep -inE 'vim' 2>/dev/null
+\end{lstlisting}
+
+Записать строку в файл и дополнительно вывести строку в терминал
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+echo 'test string' | tee ./logfile.txt
 \end{lstlisting}
 
 \subsection{Информация об использовании дискового пространства}
