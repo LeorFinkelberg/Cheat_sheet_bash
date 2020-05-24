@@ -1017,6 +1017,265 @@ No such directory: 'my_test_dir'
 
 Выполнить трассировку только выбранного фрагмента сценария можно с помощью конструкции \verb|set -x ... set +x|.
 
+\subsection{Управление потоком выполнения с помощью case}
+
+Командная оболочка \texttt{bash} поддерживает составную команду выбора из нескольких вариантов. Она имеет следующий синтаксис
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+case word in
+    [pattern [| pattern]...) commands ;;]...
+esac
+\end{lstlisting}
+
+Пример
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+#!/bin/bash
+
+clear
+echo "
+Please Select:
+1. Display System Information
+2. Display Disk Space
+3. Display Home Space Utilization
+0. Quit
+"
+read -p "Enter select [0-3] > "
+
+case $REPLY in
+    0)	echo "Program terminated."
+    exit
+    ;;
+    1)	echo "Hostname: $HOSTNAME"
+    echo 'uptime'
+    exit
+    ;;
+    2)	df -h
+    ;;
+    3)	if [[ $(id -u) -eq 0 ]]; then
+            echo "Home Space Utilization (All Users)"
+            du -sh .
+        else
+            echo "Home Space Utilization ($USER)"
+        fi
+        ;;
+    *)	echo "Invalid entry" >&2
+        exit 1
+        ;;
+esac
+\end{lstlisting}
+
+Команда \texttt{case} берет значение \emph{слова} -- в данном примере занчение переменной \texttt{REPLY} -- и затем сопоставляет его с указанными шаблонами. Найдя соответствие, она выполняет команды, связанные с найденными шаблоном. После нахождения соответствия сопоставление с нижележащими шаблонами уже не производится.
+
+Примеры шаблонов:
+\begin{itemize}
+	\item \verb|a)| соответствует, если слово содержит \texttt{a},
+	
+	\item \verb|[[:alpha:]])| соответствует, если слово содержит единственный алфавитный символ,
+	
+	\item \verb|???)| соответствует, если слово содержит ровно три символа,
+	
+	\item \verb|*.txt)| соответствует, если слово заканчивается символами \texttt{.txt},
+	
+	\item \verb|*)| соответствует любому значению слова. Считается хорошей практикой включать этот шаблон в команду \texttt{case} последним, чтобы перехватывать любые значения слова, не соответствующие ни одному из предыдущих шаблонов, то есть чтобы перехватить любые недопустимые значения
+\end{itemize}
+
+Можно объединять шаблоны: \lstinline[basicstyle=\ttfamily\fontsize{10pt}{10pt}]{q|Q)}, что значит или \texttt{q} в нижнем регистре, или \texttt{Q} в верхнем регистре.
+
+\subsection{Позиционные параметры}
+
+К аргументам строки можно обращаться по номеру: \verb|$1, $2| etc. Даже в отсутствие аргументов переменная \verb|$0| всегда содержит первый элемент командной строки -- путь к файлу выполняемой программы.
+
+\remark{%
+В действительности, если использовать механизм подстановки параметров, можно получить доступ более чем к девяти параметрам. Чтобы указать число больше девяти, следует заключить его в фигурные скобки: например, \lstinline{$\{10\}}, \lstinline{$\{55\}} и т.д.
+}
+
+Командная оболочка поддерживает также переменную \verb|$#|, хранящую число аргументов командной строки.
+
+Пример использования позиционных аргументов
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+#!/bin/bash
+
+PROGNAME=$(basename 0$)  # оставляет только имя файла, отрезая путь до файла
+
+if [[ -e $1 ]]; then
+    echo -e "\nFile Type: "
+    file $1  # определяет тип файла
+    echo -e "\nFile Status: "
+    stat $1  # выводит информация по состоянию
+else
+    echo "$PROGNAME: usage: $PROGNAME file" >&2
+    exit 1  # выход с ошибкой
+fi
+\end{lstlisting}
+
+\subsection{Использование позиционных параметров в функциях}
+
+Позиционные параметры используются для передачи аргументов не только в сценарии, но и в функции командной оболочки. Пример
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+#!/bin/bash
+
+file_info () {
+    if [[ -e $1 ]]; then
+        echo -e "\nFile type: "
+        file $1
+        echo -e "\nFile status: "
+        stat $1
+    else
+        echo "$FUNCNAME: usage: $FUNCNAME file" >&2
+        return 1
+    fi
+}
+# вызов функции
+file_info ./read_file_gen.py
+\end{lstlisting}
+
+Благодаря этому появляется множество возможностей писать полезные функции для \verb|.bashrc|.
+
+\subsection{Обработка позиционных аргументов скопом}
+
+Иногда бывает необходимо выполнить операцию сразу со всеми позиционными параметрами. Например, может понадобиться написать обертку для некоторой программы, то есть сценарий или функцию, упрощающие запуск этой программы. Обертка принимает список непонятных для нее параметров командной строки и просто передает его обернутой программе.
+
+Для этой цели командная оболочка предоставляет специальных параметра. Они оба замещаются полным списком позиционных параметров, но имеют некоторые тонкие отличия.
+
+Специальные параметры:
+\begin{itemize}
+	\item \verb|$*|: замещается списком позиционных параметров, начиная с \verb|$1|. Если имя параметра \verb|$*| заключить в двойные кавычки, позиционные параметры будут перечислены в списке через первый символ в переменной IFS (по умолчанию пробел), а сам список будет размещен в одной строке и заключен в кавычки,
+	
+	\item \verb|$@|: замещается списком позиционных параметров, начиная с \verb|$1|. Если имя параметра \verb|$@| заключить в двойные кавычки, механизм подстановки заменит его списком позиционных параметров, заключенных в кавычки \emph{по отдельности}.
+\end{itemize}
+
+В большинстве ситуаций предпочтительнее использовать прием с \verb|"$@"|, потому что он сохраняет целостность каждого позиционного параметра.
+
+Пример
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+#!/bin/bash
+
+USER="Leor Finkelberg"
+PROGNAME=$(basename $0)
+TITLE="System Information Report For $HOSTNAME"
+CURRENT_TIME=$(date +"%x %r %Z")
+TIME_STAMP="Generated $CURRENT_TIME, by $USER"
+
+report_uptime () {
+    cat <<- _EOF_
+        <H2>System Uptime</H2>
+        <PRE>$(echo "uptime")</PRE>
+        _EOF_
+    return
+}
+
+report_disk_space () {
+    cat <<- _EOF_
+        <H2>Disk Space Utilization</H2>
+        <PRE>$(df -h)</PRE>
+        _EOF_
+    return
+}
+
+report_home_space () {
+    if [[ $(id -u) -eq 0 ]]; then
+        cat <<- _EOF_
+            <H2>Home Space Utilization (All Users)</H2>
+            <PRE>$(du -sh .)</PRE>
+            _EOF_
+    else
+        cat <<- _EOF_
+            <H2>Home Space Utilization ($USER)</H2>
+            <PRE>$(du -sh .)</PRE>
+            _EOF_
+    fi
+    return
+}
+
+usage () {
+    echo "$PROGNAME: usage: $PROGNAME [-f file | -i]" 
+    return
+}
+
+write_html_page () {
+    cat <<- _EOF_
+        <HTML>
+            <HEAD>
+                <TITLE>$TITLE</TITLE>
+            </HEAD>
+            <BODY>
+                <H1>$TITLE</H1>
+                <P>$TIME_STAMP</P>
+                $(report_uptime)      # подстановка того, что возвращает функция по POSIX
+                $(report_disk_space)  # подстановка того, что возвращает функция по POSIX
+                $(report_home_space)  # подстановка того, что возвращает функция по POSIX
+            </BODY>
+        </HTML>
+        _EOF_
+    return
+}
+
+interactive=
+filename=
+
+# цикл продолжается, пока позиционный параметр $1 не получит пустое значение
+while [[ -n $1 ]]; do  # сейчас $1 это, например, -f
+    case $1 in
+        -f | --file)        shift  # теперь $2 становится $1
+                            filename=$1  # здесь $1 это имя файла
+                            ;;
+        -i | --interactive) interactive=1
+                            ;;
+        -h | --help)        usage  # вызов функции
+                            exit
+                            ;;
+        *)                  usage >&2
+                            exit 1  # выход с ошибкой
+                            ;;
+    esac
+    shift  # чтобы гарантировать завершение цикла
+done
+
+# интерактивный режим
+if [[ -n $interactive ]]; then
+    while true; do
+        read -p "Enter name of output file: " filename 
+        if [[ -e $filename ]]; then
+            read -p "'$filename' exists. Overwrite? [y/n/q] > "
+            case $REPLY in
+                Y|y)    break
+                        ;;
+                Q|q)    echo "Program terminated."
+                        exit
+                        ;;
+                *)      continue
+                        ;;
+            esac
+        fi
+        break  # если файл не существует, выбросить из цикла
+    done
+fi
+
+if [[ -n $filename ]]; then
+    if touch $filename && [[ -f $filename ]]; then
+        write_html_page > $filename  # перенаправить вывод в заданный файл
+    else
+        echo "$PROGNAME: Cannot write file '$filename'" >&2
+        exit 1
+    fi
+else
+    write_html_page  # вывести в терминал
+fi
+\end{lstlisting}
 
 
 \section{Полезные конструкции оболочки \texttt{bash}}
