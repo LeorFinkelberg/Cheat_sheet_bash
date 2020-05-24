@@ -383,7 +383,7 @@ style = bash,
 numbers = none
 ]
 report_disk_space () {
-    cat <<- _EOF_
+    cat <<- _EOF_                        # здесь строго ТАБУЛЯЦИЯ!
         <H2>Disk Space Utilization</H2>  # здесь строго ТАБУЛЯЦИЯ!
         <PRE>$(df -h)</PRE>              # здесь строго ТАБУЛЯЦИЯ!
         _EOF_                            # здесь строго ТАБУЛЯЦИЯ!
@@ -595,12 +595,12 @@ USER="leor.finkelberg"
 
 report_home_space () {
     if [[ $(id -u) -eq 0 ]]; then
-        cat <<- _EOF_
+        cat <<- _EOF_                                    # здесь строго ТАБУЛЯЦИЯ!
             <H2>Home Space Utilization (All Users)</H2>  # здесь строго ТАБУЛЯЦИЯ!
             <PRE>$(du -sh .)</PRE>                       # здесь строго ТАБУЛЯЦИЯ!
             _EOF_                                        # здесь строго ТАБУЛЯЦИЯ!
     else
-        cat <<- _EOF_
+        cat <<- _EOF_                                    # здесь строго ТАБУЛЯЦИЯ!
             <H2>Home Space Utilization ($USER)</H2>      # здесь строго ТАБУЛЯЦИЯ!
             <PRE>$(du -sh $HOME)</PRE>                   # здесь строго ТАБУЛЯЦИЯ!
             _EOF_                                        # здесь строго ТАБУЛЯЦИЯ!
@@ -755,7 +755,7 @@ IFS="$OLD_IFS"
 
 Оператор \verb|<<<| отмечает \emph{встроенную строку}. Встроенную строку (here string) простирается только до конца текущей строки кода. В данном примере строка из файла подается на стандартный ввод команды \texttt{read}.
 
-Вот несколько любопытных примеров работы со встроенной строкой
+Вот несколько любопытных примеров работы со \emph{встроенной строкой}
 \begin{lstlisting}[
 style = bash,
 numbers = none
@@ -765,6 +765,15 @@ $ read -r -a words <<< "$string"
 $ echo "${words[0]}"  # This
 $ echo "${words[1]}"  # is
 ...
+\end{lstlisting}
+
+Удобно тестировать регулярное выражение с помощью команды \texttt{grep}
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ grep -iE '(P|J)ython' <<< 'Jython'
+$ grep -iE '[[:alpha:]]+\.[[:alpha:]]+@[[:alpha:]]+\.ru' <<< 'leor.finkelbex.ru'
 \end{lstlisting}
 
 \subsection{Проверка ввода}
@@ -825,6 +834,189 @@ numbers = none
 ]
 [[ $(echo "$REPLY" | wc -w) -gt 1 ]] && invalid_input
 \end{lstlisting}
+
+\subsection{Циклы}
+
+Синтаксис цикла с командой \texttt{while} выглядит так
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+while commands; do
+    commands
+done
+\end{lstlisting}
+
+Подобно \texttt{if}, команда \texttt{while} проверяет \emph{код завершения} списка команд. Пока код завершения равен 0, она выполняет команды внутри цикла. В сценарии, приведенном выше, создается переменная \texttt{count}, и ей присваивается начальное значение 1. Команда \texttt{while} проверяет код завершения команды \texttt{test}. Пока \texttt{test} возвращает код 0, команды внутри цикла продолжают выполнятся. В конце каждого цикла повторно выполняется команда \texttt{test}. После шести итераций цикла значение переменной \texttt{count} увеличится до 6, команда \texttt{test} вернет код завершения, отличный от 0, и цикл завершится, а программа продолжит выполнение с инструкцией, следующей непосредственно за циклом.
+
+Пример
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+#!/bin/bash
+
+DELAY=2  # время отображения результатов на экране (в секундах)
+
+while [[ $REPLY != 0 ]]; do
+    clear
+    cat <<- _EOF_                          # строго ТАБУЛЯЦИЯ
+        Please Select:                     # строго ТАБУЛЯЦИЯ
+                                           # строго ТАБУЛЯЦИЯ
+        1. Display System Information      # строго ТАБУЛЯЦИЯ
+        2. Display Disk Space              # строго ТАБУЛЯЦИЯ
+        3. Display Home Space Utilization  # строго ТАБУЛЯЦИЯ
+        0. Quit                            # строго ТАБУЛЯЦИЯ
+                                           # строго ТАБУЛЯЦИЯ
+    _EOF_                                  # строго ТАБУЛЯЦИЯ
+    read -p "Enter selection [0-3] > "  # приглашение к вводу
+
+    if [[ $REPLY =~ ^[0-3]$ ]]; then
+        if [[ $REPLY == 1 ]]; then
+            echo "Hostname: $HOSTNAME"
+            echo uptime
+            sleep $DELAY
+        fi
+        if [[ $REPLY == 2 ]]; then
+            df -h
+            sleep $DELAY
+        fi
+        if [[ $REPLY == 3 ]]; then
+            if [[ $(id -u) -eq 0 ]]; then
+                echo "Home Space Utilization (All Users)"
+                du -sh
+            else
+                echo "Home Space Utilization ($USER)"
+                du -sh $HOME/Roaming
+            fi
+            sleep $DELAY
+        fi
+    else
+        echo "Invalid entry."
+        sleep $DELAY
+    fi
+done
+echo "Program terminated."
+\end{lstlisting}
+
+Можно переписать эту программу с использованием команд \texttt{continue} и \texttt{break}
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+#!/bin/bash
+
+DELAY=2
+USER="leor.finkelberg"
+
+while true; do
+    clear
+    cat <<- _EOF_
+        Please Select:
+
+        1. Display System Information
+        2. Display Disk Space
+        3. Display Home Space Utilization
+        0. Quit
+
+    _EOF_
+    read -p "Enter selection [0-3] > "
+
+    if [[ $REPLY =~ ^[0-3]$ ]]; then
+        if [[ $REPLY == 1 ]]; then
+            echo "Hostname: $HOSTNAME"
+            echo 'uptime'
+            sleep $DELAY
+            continue
+        fi
+        if [[ $REPLY == 2 ]]; then
+            df -h
+            sleep $DELAY
+            continue
+        fi
+        if [[ $REPLY == 3 ]]; then
+            if [[ $(id -u) -eq 0 ]]; then
+                echo "Home Space Utilization (All Users)"
+                du -sh .
+            else
+                echo "Home Space Utilization ($USER)"
+            fi
+            sleep $DELAY
+            continue
+        fi
+        if [[ $REPLY == 0 ]]; then
+            break
+        fi
+    else
+        echo "Invalid entry."
+        sleep $DELAY
+    fi
+done
+echo "Program terminated."
+\end{lstlisting}
+
+Для того чтобы избежать ошибок, связанных с некорректными подстановками, следует читаемые переменные оборачивать кавычками, т.е. вместо \verb|$REPLY| писать \verb|"$REPLY"|. Кавычки следует использовать не только для предохранения от пустых строк, но и в том случае, если переменная содержит строку с несколькими словами, например имя файла со встроенными пробелами.
+
+\subsection{Трассировка}
+
+Ошибки часто становятся причиной неожиданного направления выполнения сценария. То есть фрагменты сценария могут никогда не выполняться или выполняться в неправильном порядке или в неправильные моменты. Чтобы увидеть, как в действительности протекает выполнение программы, воспользуемся приемом \emph{трассировки}.
+
+Один из способов трассировки заключается в размещении информативных сообщений в разных точках сценария, сообщающих, где протекает выполнение
+\begin{lstlisting}[
+style = bash,
+numbers = none
+] 
+#!/bin/bash
+
+dir_name="my_test_dir"
+
+echo "Preparing to delete files" >&2
+if [[ -d $dir_name ]]; then
+    if cd $dir_name; then
+        echo "Deleting files" >&2
+        echo rm -f *
+    else
+        echo "Cannot cd to '$dir_name'" >&2
+        exit 1
+    fi
+else
+    echo "No such directory: '$dir_name'" >&2
+    exit 1
+fi
+echo "File deletion complete" >&2
+\end{lstlisting}
+
+Здесь сообщения посылаются в стандартный поток вывода ошибок (\verb|>&2|), чтобы отделить их от обычного вывода. Кроме того отсутствуют отступы перед строками с сообщениями, -- это упростить их поиск, когда придет время убрать эти строки.
+
+Кроме того, \texttt{bash} поддерживает встроенный метод трассировки, реализованный в виде параметра \texttt{-x}. Этот параметр можно добавить в первую строку сценария
+\begin{lstlisting}[
+numbers = none
+]
+#!/bin/bash -x
+...
+\end{lstlisting}
+
+Включенный режим трассировки позволяют увидеть, какой вид приобретают команды после применения подстановки. Начальные знаки <<+>> помогают отличить трассировочную информацию от обычного вывода. Знак <<+>> -- это символ по умолчанию, используемый для вывода трассировки. Он хранится в переменной командной оболочки \texttt{PS4} (Prompt string 4 -- строка приглашения 4).
+
+Можно изменить эту строку, добавив, например, номер выполняемой строки в сценарии. Здесь необходимо использовать одиночные кавычки -- это предотвращает подстановку до момента, когда строка приглашения не будет использоваться фактически
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ export PS4='$LINENO: '
+$ ./del_dir_test.sh
+# выведет
+3: dir_name=my_test_dir
+5: echo 'Preparing to delete files'
+Preparing to delete files
+6: [[ -d my_test_dir ]]
+15: echo 'No such directory: '\''my_test_dir'\'''
+No such directory: 'my_test_dir'
+16: exit 1
+\end{lstlisting}
+
+Выполнить трассировку только выбранного фрагмента сценария можно с помощью конструкции \verb|set -x ... set +x|.
+
 
 
 \section{Полезные конструкции оболочки \texttt{bash}}
@@ -1084,6 +1276,24 @@ numbers = none
 du -ch -d 1 2>/dev/null
 \end{lstlisting}
 
+\subsection{Информация о файлах и операциях}
+
+Чтобы узнать используется в файле табуляция или нет достаточно прочитать его в терминал командой \texttt{cat} с ключом \verb|-A|. Символ табуляции в тексте будет представлен парой символов \verb|^I| (что означает <<Ctrl+I>>). К слову, символ \verb|$| отмечает истинный конец строки, помогая увидеть дополнительные пробелы в конце строки
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+cat -A file_name.txt
+\end{lstlisting}
+
+Вывести список удаляемых файлов
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ echo rm -f *.txt
+\end{lstlisting}
+
 \section{Вспомогательные конструкции \texttt{Vim}}
 
 \subsection{Регистры \texttt{Vim}}
@@ -1213,14 +1423,46 @@ v3wey
 \end{lstlisting}
 
 
-
-
 Вставить данные из именованного регистра \texttt{b}
 \begin{lstlisting}[
 language = cmd,
 numbers = none
 ]
 "bp	
+\end{lstlisting}
+
+Открыть файл на заданной строке
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+$ vim +10 file_name.txt
+\end{lstlisting}
+
+Открыть файл и найти заданный шаблон
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+$ vim +/pattern file_name.txt
+\end{lstlisting}
+
+Выполнить одну или несколько команд редактора \texttt{ex} при старте можно с помощью опции \verb|-c| (\texttt{Vim} принимает до 10 штук). 
+
+Например, чтобы скопировать несколько строк из файла в буфер, а затем закрыть можно использовать ключ \verb|-c| несколько раз
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+$ vim -c %y -c q file_name.py
+\end{lstlisting}
+
+Запустить \texttt{Vim}, открыв два файла, с вертикальным разбиением
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+$ vim -O2 file_name1.txt file_name2.txt
 \end{lstlisting}
 
 
