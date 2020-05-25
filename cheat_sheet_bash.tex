@@ -1278,6 +1278,421 @@ fi
 \end{lstlisting}
 
 
+\subsection{Цикл for}
+
+Команду \texttt{for} удобно использовать в командной строке
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ for i in A B C D; do echo $i; done
+# выведет
+A
+B
+C
+D
+\end{lstlisting}
+
+По-настоящему мощной особенностью \texttt{for} является разнообразие способов формирования списка слов. Например, можно использовать подстановку в фигурных скобках
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ for i in {A..D}; do echo $i; done
+\end{lstlisting}
+
+Или подстановку имен файлов
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ for i in read*.sh; do echo $i; done
+# выведет
+read-ifs.sh
+read-integer.sh
+read-multiple.sh
+read-secret.sh
+read-validate.sh
+\end{lstlisting}
+или подстановку команд
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+...
+for file in $(ls); do
+    printf "File: %s;\t\tCount: %s\n" $file $(echo $file | wc -c)
+done
+\end{lstlisting}
+
+Здесь \verb|$(ls)| возвращает список файлов, по которому можно <<пробежаться>> переменной цикла \texttt{file}. 
+
+Если необязательный компонент \emph{коллекции} в команде \texttt{for} отсутствует, она по умолчанию обрабатывает позиционные аргументы, переданные при вызове сценария
+\begin{lstlisting}[
+style = bash,
+title = {\sffamily simple\_for.sh},
+numbers = none
+]
+#!/bin/bash
+
+# здесь переменная цикла file поочередно принимает имена файлов, переданные при вызове сценария
+for file; do
+    if [[ -e $file ]]; then  # если файл существует, то ...
+        line=$(grep -inE 'done' $file)
+        echo $line
+    fi
+done
+\end{lstlisting}
+
+Этот сценарий можно было бы вызвать так
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ ./simple_for.sh file_name1.txt file_name2.txt
+\end{lstlisting}
+
+\subsection{Цикл for в стиле языка C}
+
+Пример
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+#!/bin/bash
+
+for (( i=0; i<5; i+=1 )); do
+    echo $i
+done
+\end{lstlisting}
+
+Здесь \verb|i=0| инициализирует переменную, \verb|i<5| указывает условие останова и \verb|i=i+1| обеспечивает изменчивость переменной.
+
+\subsection{Подстановка параметров}
+
+Некоторые формы подстановки параметров помогают решать проблемы с несуществующими, или пустыми, переменными: \verb|${parameter:-default_value}|. Если параметр неопределен (то есть отсутствует) или содержит пустое значение, механизм подстановки вернет значение указанного слова. Если параметр непустой, механизм подстановки вернет значение параметра
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ foo=  # пустое значение
+$ echo ${foo:-"default_value"}  # default_value
+$ foo=bar
+$ echo ${foo:-"default_value"}  # bar
+\end{lstlisting}
+
+Вот еще один вариант подстановки, где вместо дефиса используется знак <<\texttt{=}>>: \verb|${parameter:=value}|. Если параметр не определен или содержит пустое значение, механизм подстановки вернет значение указанного слова и дополнительно присвоит его параметру. Если параметр непустой, механизм подстановки вернет значение параметра
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ foo=
+$ echo ${foo:="value"}  # value
+$ foo=bar
+$ echo ${foo:="value"}  # bar
+$ echo $foo  # bar
+\end{lstlisting}
+
+\subsection{Получение имен переменных}
+
+Командная оболочка может возвращать \emph{имена переменных}: \verb|${!prefix*}|, \verb|${!prefix@}|. Эти две формы подстановки возвращают имена существующих переменных, начинающиеся с указанного префикса. Согласно документации \texttt{bash}, обе формы работают совершенно одинаково. 
+
+Следующая команда выводит список всех переменных окружения с именами, начинающимися с \texttt{BASH}
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ echo ${!BASH*}  # BASH BASHOPTS BASHPID BASH_ALIASES BASH_ARGC...
+$ echo ${!USER*}  # USERDOMAIN USERNAME USERPROFILE
+\end{lstlisting}
+
+\subsection{Операции со строками}
+
+Существует множество форм подстановки, которые можно использовать для работы со строками. Многие из них хорошо подходят для операций с путями. Форма \verb|${#parameter}| вернет длину строки, содержащуюся в указанном параметре. Обычно роль параметра играет строка, но если передать \verb|@| или \verb|*|, то механизм подстановки вернет число позиционных параметров
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ foo="This string is long."
+$ echo "'$foo' is ${#foo} character long."  # 'This string is long.' is 20 characters long.
+\end{lstlisting}
+
+Следующая форма подстановки
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+${parameter:shift}
+${parameter:shift:length}
+\end{lstlisting}
+используется для извлечения фрагмента строки, содержащейся в параметре. Извлечение начинается с указанного смещения от начала строки и продолжается до конца строки, если не указано длина.
+
+Если указать отрицательное число, его отсчет начнется с конца строки вместо начала. Обратите внимание, что отрицательному значению должен предшествовать пробел, чтобы предотвратить путаницу с формой \verb|${parameter:-value}|. 
+
+Следующие две формы
+\begin{lstlisting}[
+numbers = none
+]
+${parameter#pattern}
+${parameter##pattern}
+\end{lstlisting}
+возвращают значение параметра, удаляя из него начальную часть, определяемую указанным шаблоном. В шаблоне допускается использовать групповые символы: например, те, что используются в подстановке путей. Эти две формы отличаются тем, что форма \verb|#| удаляет кратчайшее совпадение, тогда как форма \verb|##| удаляет самое длинное совпадение
+\begin{lstlisting}[
+numbers = none
+]
+$ foo="file.tar.gz"
+$ echo ${foo#*\.}  # tar.gz
+$ echo ${foo##*\.}  # gz
+\end{lstlisting}
+
+Следующие две формы
+\begin{lstlisting}[
+numbers = none
+]
+${parameter%pattern}
+${parameter%%pattern}
+\end{lstlisting}
+действуют так же, как формы \verb|#| и \verb|##|, представленные выше, но удаляют текст с конца строки, содержащейся в параметре
+\begin{lstlisting}[
+numbers = none
+]
+$ foo="file.tar.gz"
+$ echo ${foo%\.*}  # file.tar
+$ echo ${foo%%\.*}  # file
+\end{lstlisting}
+
+Следующие формы
+\begin{lstlisting}[
+numbers = none
+]
+${parameter/pattern/string}
+${parameter//pattern/string}
+${parameter/#pattern/string}
+${parameter/%pattern/string}
+\end{lstlisting}
+выполняют поиск с заменой в содержимом указанного параметра. Если в параметре будет найдено совпадение с шаблоном, который может содержать групповые символы, это совпадение будет заменено содержимым указанной строки. Первая форма заменит только первое совпадение с шаблоном. Форма \verb|//| заменит все найденные совпадения. Форма \verb|/#| выполняет замену, только если совпадение с шаблоном найдено в самом начале строки, а формы \verb|/%| выполняет замену, только если совпадение найдено в конце строки. Часть \verb|/string| можно опустить, и тогда совпавший фрагмент будет удален.
+
+Пример
+\begin{lstlisting}[
+numbers = none
+]
+#!/bin/bash
+
+for i; do
+    if [[ -r $i ]]; then
+        max_word=
+        max_len=
+        for j in $(strings $i); do
+            len=${#j}  # <<---
+            if (( len > max_len )); then
+                max_len=$len
+                max_word=$j
+            fi
+            ...
+\end{lstlisting}
+
+Если, к пример, требуется убрать нули в начале имени файла, то
+\begin{lstlisting}[
+numbers = none
+]
+$ file="00test_file.txt"
+$ echo ${file/#00}  # test_file.txt
+\end{lstlisting}
+
+Пример использования составного оператора (\verb|++|)
+\begin{lstlisting}[
+numbers = none
+]
+for ((i=0; i<=20; ++i)); do
+    if [[ $((i % 5)) -eq 0 ]]; then
+        printf "<%d> " $i
+    else
+        printf "%d " $i
+    fi
+done
+\end{lstlisting}
+
+Бывает полезным тернарный оператор
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ a=0
+$ echo $((a<1?++a:--a))  # 1
+$ echo $((a<1?++a:--a))  # 0
+\end{lstlisting}
+
+Обратите внимание, что прямое присваивание в этом операторе считается недопустимой операцией. Эту проблему можно решить, заключив выражения присваивания в круглые скобки
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ a=0
+$ echo $(( a<1?(a+=1):(a-=1) ))
+\end{lstlisting}
+
+\subsection{Массивы}
+
+Значения элементам массивов можно присваивать одним из двух способов. Присваивание одиночных значений осуществляется с использованием следующего синтаксиса
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+name[index]=value
+\end{lstlisting}
+
+Присвоить сразу несколько значений можно с использованием следующего синтаксиса
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+name=(value1 value2 ...)
+\end{lstlisting}
+
+Обратиться к элементу массива можно так
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ echo ${array[4]}
+\end{lstlisting}
+
+Вывести содержимое всего массива можно, используя индексы \verb|*| и \verb|@|
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ read -r -a words <<< "This is a simple string."
+$ echo ${words[*]}  # This is a simple string.
+$ echo ${words[@]}  # This is a simple string.
+\end{lstlisting}
+
+Для того чтобы вывести массив по элементам, разделенным не по пробелам по кавычкам, следует воспользоваться конструкцией
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ animals=("a dog" "a cat" "a fish")
+$ for i in "${animals[@]}"; do
+>    echo $i
+>done
+# выведет
+a dog
+a cat
+a fish
+\end{lstlisting}
+
+В общем случае конструкция \verb|"${array[@]}"| гораздо полезнее.
+
+Определить число элементов в массиве можно так
+\begin{lstlisting}[
+numbers = none
+]
+$ cae_packages=("Ansys MAPDL" "Nastran" "Abaqus")
+$ echo ${#cae_packages[@]}  # 3
+\end{lstlisting}
+
+Удалить массив можно командой \texttt{unset}
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ unset cae_packages  # удалить массив
+$ unset 'cae_packages[2]'  # удалить один элемент
+\end{lstlisting}
+
+При удалении одного элемента массива нужно элемент массива заключить в кавычки, чтобы предотвратить подстановку путей оболочки.
+
+\subsection{Группы команд и подоболочки}
+
+Группы команд оформляются с помощью \verb|{...}|, а подоболочки -- с помощью \verb|(...)|. Все команды, входящие в группу, выполняются в текущей оболочке, подоболочка (как можно догадаться из названия) выполняет свои команды в дочерней копии текущей командной оболочке. Это означает, что в момент запуска подоболочки создается \emph{копия текущей оболочки} и передается новому экземпляру оболочки. Когда подоболочка завершается, ее копия окружения уничтожается, соответственно теряются любые изменения в окружении подоболочки (включая значения переменных).
+
+Поэтому если нет прямой необходимости в использовании подоболочки, предпочтительнее использовать \emph{группы команд}. Группы команд выполняются быстрее и требуют меньше памяти.
+
+\remark{%
+Конвейеры команд всегда выполняются в \emph{подоболочке}!
+}
+
+Командная оболочка поддерживает экзотическую форму подстановки, которая называется \emph{подстановкой процессов}. Подстановка процессов оформляется двумя способами: для процессов, отправляющих результаты в \emph{стандартный вывод}
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+<(list)
+\end{lstlisting}
+и для процессов, принимающих данные через стандартный ввод
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+>(list)
+\end{lstlisting}
+
+Подстановка процессов позволяет интерпретировать вывод подоболочки как обычный файл и осуществлять его перенаправление. Так как это форма подстановки, всегда можно узнать действительное подставляемое значение
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ echo <(echo "foo")  # /dev/fd/63
+\end{lstlisting}
+
+\subsection{Ловушки}
+
+В больших и сложных программах процедура обработки сигналов может оказаться весьма кстати. Проектируя большие сценарии, важно предусмотреть их реакцию на неожиданный выход пользователя из системы или выключение компьютера во время их выполнения. Программы, представляющие эти процессы, могут выполнять некие действия, гарантирующие корректное завершение с сохранением необходимых данных.
+
+Пример
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+#!/bin/bash
+
+# ловушка, которая реагирует на 
+trap "echo 'I am ignoring you.'" SIGINT SIGTERM
+
+for i in {1..5}; do
+    echo "Iteration $i of 5"
+    sleep 5
+done
+\end{lstlisting}
+
+Этот сценарий определяет ловушку, которая будет выполнять команду \texttt{echo} в ответ на сигналы \texttt{SIGINT} и \texttt{SIGTERM}, получаемые сценарием во время выполнения.
+
+При попытке прервать работу программы в терминал будет выводится сообщение <<\texttt{I am ignoring you.}>>.
+
+Иногда бывает непросто сформировать строку с требуемой последовательностью команд, поэтому на практике в качестве команды часто использует функции. Следующий пример демонстрирует применение разных функций для обработки разных сигналов
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+#!/bin/bash
+
+exit_on_signal_SIGINT () {
+    echo "Script interrupted." 2>&1
+    exit 0  # << для того чтобы прекратить выполнение программы!
+}
+
+exit_on_signal_SIGTERM () {
+    echo "Script terminated." 2>&1
+    exit 0  # << для того чтобы прекратить выполнение программы!
+}
+
+# ловушки
+trap exit_on_signal_SIGINT SIGINT
+trap exit_on_signal_SIGTERM SIGTERM
+
+for i in {1..5}; do
+    echo "Iteration $i of 5"
+    sleep 5
+done
+\end{lstlisting}
+
+Здесь в каждой ловушке используется своя функция, которая будет вызвана для обработки конкретного сигнала. Обратите внимание на включение команды \texttt{exit} в обе функции обработки сигналов. Без этого сценарий продолжил бы выполняться после завершения функция.
+
+Теперь если во время выполнения 
+
+
+
 \section{Полезные конструкции оболочки \texttt{bash}}
 
 Найти в корневом каталоге и всех подкатлогах (\texttt{/}), обычные файлы (\texttt{-type f}), измененные за последний день (\texttt{-mtime -l}), за исключением тех файлов, у которых есть суффикс \texttt{.o} (\texttt{! -name '*.o'})
@@ -1435,6 +1850,14 @@ numbers = none
 curl -O http://merionet.ru/info.html -O http://wiki.merionet.ru/about.html
 \end{lstlisting}
 
+Вывести пакеты, имеющие отношение к \texttt{Python}. Ключ \verb|-n| для подавления автоматического вывода всех строк
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+conda list | sed -n '/python/p' 
+\end{lstlisting}
+
 
 \subsection{Переадресация ввода-вывода}
 
@@ -1552,6 +1975,16 @@ numbers = none
 ]
 $ echo rm -f *.txt
 \end{lstlisting}
+
+Вывести час создания файла
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ stat -c %y file_name.txt | cut -c 12-13  # 17
+\end{lstlisting}
+
+
 
 \section{Вспомогательные конструкции \texttt{Vim}}
 
