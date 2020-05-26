@@ -1689,300 +1689,42 @@ done
 
 Здесь в каждой ловушке используется своя функция, которая будет вызвана для обработки конкретного сигнала. Обратите внимание на включение команды \texttt{exit} в обе функции обработки сигналов. Без этого сценарий продолжил бы выполняться после завершения функция.
 
-Теперь если во время выполнения 
+\section{Язык обработки шаблонов awk. Базовые концепции}
 
+Программа на \texttt{awk} (программа, набранная в командной строке или в файле программы) состоит из одной и более строк, в которых содержится \emph{шаблон} и/или \emph{действие} в следующем формате: \verb|шаблон { действие }|.
 
+Шаблон выбирает строки из ввода. Утилита \texttt{awk} выполняет действие над всеми строками, выбранными шаблоном. Фигурные скобки, в которые заключено действие, позволяют \texttt{awk} отличить его от шаблона.
 
-\section{Полезные конструкции оболочки \texttt{bash}}
+Если программная строка не содержит шаблона, \texttt{awk} выбирает из ввода все строки. Если программная строка не содержит действия, \texttt{awk} копирует выбранные строки на стандартный вывод.
 
-Найти в корневом каталоге и всех подкатлогах (\texttt{/}), обычные файлы (\texttt{-type f}), измененные за последний день (\texttt{-mtime -l}), за исключением тех файлов, у которых есть суффикс \texttt{.o} (\texttt{! -name '*.o'})
+Два уникальных шаблона, \texttt{BEGIN} и \texttt{END}, выполняют команды перед тем, как утилита \texttt{awk} приступит к обработке ввода, и после того, как она завершит эту обработку. До начала обработки всего ввода утилита \texttt{awk} выполняет \emph{действия}, связанные с шаблоном \texttt{BEGIN}, а по окончании обработки -- \emph{действия}, связанные с шаблоном \texttt{END}.
 
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-find / -type f -mtime -l ! -name '*.o'
-\end{lstlisting}
+\texttt{awk} поддерживает несколько специальных переменных (\texttt{FILENAME}, \texttt{NR}, \texttt{FS}, \texttt{NF} и пр.). Рассмотрим для примера переменную \texttt{NR}, смысл которой зависит от контекста: если переменная \texttt{NR} используется в контексте обычного действия, то она содержит номер записи (строки), принадлежащей текущей строке. Однако, если эта переменная используется в контексте шаблона \texttt{END}, то она связывается с номером последней строки.
 
-Вывод имен файлов и удаление файлов с именами \texttt{core} или \texttt{junk} из рабочего каталога и всех его подкаталогов (круглые скобки обязательно отделяются пробелами)
-
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-find . \( -name core -o -name junk \) -print -exec rm {} \;
-\end{lstlisting}
-
-Скопировать все \texttt{csv}-файлы из родительской директории (\texttt{..}) в текущую (\texttt{.})
-
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-cp -ip ../*.csv
-\end{lstlisting}
-
-Скопировать файл из родительской директории в текущую директорию
-
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-cp -ip ../Cheat_sheet_Git/cheat_sheet_git.tex .
-\end{lstlisting}
-
-Скопировать одну директорию в другую
-
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-cp -rip ../Cheat_sheet_Git/style_packages/ .
-\end{lstlisting}
-
-Переименовать файл
-
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-mv cheat_sheet_git.tex cheat_sheet_bash.tex
-\end{lstlisting}
-
-Найти все файлы с расширением \texttt{*.csv} и выбрать из них те, в которых содержится строка \texttt{'state'} (для каждого файла, отвечающего поисковому шаблону, запускается свой процесс)
-
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-find . -name '*.csv' -exec grep -niE 'state' {} \;
-\end{lstlisting}
-
-Вывести список файлов из текущей директории и всех поддиректорий
-
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-ls -l *
-\end{lstlisting}
-
-Найти среди файлов с расширением \texttt{*.py} те, в именах которых есть подстрока \texttt{'spark'} (используется конвейер)
-
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-ls -l *.py | grep -iE 'spark'
-\end{lstlisting}
-
-Найти файлы с расширением \texttt{*.py} и к каждому из них применить команду \texttt{grep}, которая будет искать в файле подстроку \texttt{'argparse'} без учета регистра, с выводом номера строки, на которой она нашла искомую строку по регулярному выражению \texttt{'argparse'} (работает {\color{deepred} медленно}, так как для каждого файла, отвечающего поисковому шаблону запускается свой процесс)
-
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-find . -maxdepth 1 -name '*.py' -exec grep -inE 'argparse' {} \;
-\end{lstlisting}
-
-Альтернативный вариант с использованием \texttt{xargs} (работает значительно быстрее варианта с \texttt{-exec})
-
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-find . -maxdepth 1 -name '*.py' | xargs grep -inE 'argparse'
-\end{lstlisting} 
-
-Найти в файлах с расширением \texttt{*.tex} строку \texttt{'section'} без учета регистра и вывести три строки контекста
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-find . -name '*.tex' | xargs grep -iE 'section' -3
-\end{lstlisting}
-
-Вывести список пакетов, в именах которых встречается подстрока \texttt{'python'} с контекстом \texttt{'sql'}
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-conda list | grep -inE 'python.*sql'
-\end{lstlisting}
-
-Получить информацию о доступном метсе на диске
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-df -h
-\end{lstlisting}
-
-Скачать файл с тем же именем, что на удаленном репозитории 
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-curl -O http://merionet.ru/yourfile.tar.gz
-\end{lstlisting}
-
-Скачать файл с удаленного репозитория с новым именем и/или путем
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-curl -o newfile.tar.gz http:// merionet.ru /yourfile.tar.gz
-\end{lstlisting}
-
-Возобновить прерванную загрузку с того места, где она остановилась
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-curl -C - -O http://merionet.ru/yourfile.tar.gz
-\end{lstlisting}
-
-Скачать несколько файлов 
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-curl -O http://merionet.ru/info.html -O http://wiki.merionet.ru/about.html
-\end{lstlisting}
-
-Вывести пакеты, имеющие отношение к \texttt{Python}. Ключ \verb|-n| для подавления автоматического вывода всех строк
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-conda list | sed -n '/python/p' 
-\end{lstlisting}
-
-
-\subsection{Переадресация ввода-вывода}
-
-Перенаправить \emph{стандартный поток вывода} данных (дескриптор файла 1) и \emph{стандартный поток вывода ошибок} (дескриптор файла 2), которые возвращает \texttt{conda} с захватом всех пакетов, в именах которых встречается подстрока \texttt{'python'}, в файл с именем \texttt{test\_file.log} (временный поток вывода данных \texttt{\&1}). Если команда вернет ошибку, то сообщение ошибки перепишет содержимое файла \texttt{test\_file.log}
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-conda list | grep -inE 'python' > test_file.log 2>&1
-\end{lstlisting}
-
-Более короткий вариант рассмотренной выше конструкции
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-conda list | grep -inE 'python' &> test_file.log
-\end{lstlisting}
-
-Присоединить стандартный поток вывода данных и стандартный поток вывода ошибок к содержимому файла. Конструкция \texttt{rm df} возвращает сообщение об ошибке <<\texttt{rm: cannot remove 'df': No such file or directory}>>, которое можно добавить в файл
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-rm df &>> test_file.txt
-\end{lstlisting}
-
-Найти в текущей директории файлы с расширением \texttt{.tex}, в именах которых встречается подстрока <<\texttt{bash}>>, перенаправить эти файлы утилите \texttt{grep}, которая будет искать в теле файлов строки, в которых встречается подстрока <<\texttt{vim}>>, причем стандартный поток вывода ошибок перенаправляется в <<черную дыру>>
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-find . -name '*bash*.tex' | xargs grep -inE 'vim' 2>/dev/null
-\end{lstlisting}
-
-Записать строку в файл и дополнительно вывести строку в терминал
+Значение разделителей полей в выводе можно изменить, присвоив его значение переменной \texttt{OFS}
 \begin{lstlisting}[
 style = bash,
 numbers = none
 ]
-echo 'test string' | tee ./logfile.txt
+$ cat ofs_demo
+BEGIN { OFS = "\t" }
+    {
+    if ($1 ~ /ply/) $1 = "plymouth"
+    if ($1 ~ /chev/) $1 = "chevrolet"
+    print
+    }
+$ awk -f ofs_demo file_name.txt
 \end{lstlisting}
 
-\subsection{Информация об использовании дискового пространства}
-
-Вывести размер директорий в Мегабайтах (\texttt{M})
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-du -BM
-\end{lstlisting}
-
-Вывести итоговый размер директории (\texttt{c}) в Мегабайтах (\texttt{M})
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-du -cBM
-\end{lstlisting}
-
-Перевести размеры директорий в понятный человеку формат
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-du -h
-\end{lstlisting}
-
-Вывести информацию об указанной директории в дружественном формате
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-du -sh style_packages/
-\end{lstlisting}
-
-Вывести размер папок текущей директории, не погружаясь глубже корневых папок
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-du -h -d 1
-\end{lstlisting}
-или так
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-du --max-depth=1 -h
-\end{lstlisting}
-
-Вывести информацию об использовании дискового пространства иерархией каталога с подсчетом общего размера каталога и перенаправлением стандартного потока вывода ошибок в <<черную дыру>>
-\begin{lstlisting}[
-language = cmd,
-numbers = none
-]
-du -ch -d 1 2>/dev/null
-\end{lstlisting}
-
-\subsection{Информация о файлах и операциях}
-
-Чтобы узнать используется в файле табуляция или нет достаточно прочитать его в терминал командой \texttt{cat} с ключом \verb|-A|. Символ табуляции в тексте будет представлен парой символов \verb|^I| (что означает <<Ctrl+I>>). К слову, символ \verb|$| отмечает истинный конец строки, помогая увидеть дополнительные пробелы в конце строки
+Пример использования конструкций \texttt{BEGIN}, \texttt{END} и \texttt{printf}
 \begin{lstlisting}[
 style = bash,
 numbers = none
 ]
-cat -A file_name.txt
+awk -F ',' 'BEGIN { print "### PROGRAM ###" } { sum += $3 } END { printf "result=%s", sum }' ram_price.csv
 \end{lstlisting}
 
-Вывести список удаляемых файлов
-\begin{lstlisting}[
-style = bash,
-numbers = none
-]
-$ echo rm -f *.txt
-\end{lstlisting}
-
-Вывести час создания файла
-\begin{lstlisting}[
-style = bash,
-numbers = none
-]
-$ stat -c %y file_name.txt | cut -c 12-13  # 17
-\end{lstlisting}
+Здесь печатается строка <<\verb|### PROGRAM ###|>>, потому что она связана с \emph{шаблоном} \texttt{BEGIN}. Затем вычисляется сумма 3-его столбца и наконец выполняется строка <<\verb|result=%s|>>, так как она связана с \emph{шаблоном} \texttt{END}.
 
 
 
@@ -2156,6 +1898,416 @@ numbers = none
 ]
 $ vim -O2 file_name1.txt file_name2.txt
 \end{lstlisting}
+
+
+\section{Полезные конструкции оболочки \texttt{bash}}
+
+Найти в корневом каталоге и всех подкатлогах (\texttt{/}), обычные файлы (\texttt{-type f}), измененные за последний день (\texttt{-mtime -l}), за исключением тех файлов, у которых есть суффикс \texttt{.o} (\texttt{! -name '*.o'})
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+find / -type f -mtime -l ! -name '*.o'
+\end{lstlisting}
+
+Вывод имен файлов и удаление файлов с именами \texttt{core} или \texttt{junk} из рабочего каталога и всех его подкаталогов (круглые скобки обязательно отделяются пробелами)
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+find . \( -name core -o -name junk \) -print -exec rm {} \;
+\end{lstlisting}
+
+Скопировать все \texttt{csv}-файлы из родительской директории (\texttt{..}) в текущую (\texttt{.})
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+cp -ip ../*.csv
+\end{lstlisting}
+
+Скопировать файл из родительской директории в текущую директорию
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+cp -ip ../Cheat_sheet_Git/cheat_sheet_git.tex .
+\end{lstlisting}
+
+Скопировать одну директорию в другую
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+cp -rip ../Cheat_sheet_Git/style_packages/ .
+\end{lstlisting}
+
+Переименовать файл
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+mv cheat_sheet_git.tex cheat_sheet_bash.tex
+\end{lstlisting}
+
+Найти все файлы с расширением \texttt{*.csv} и выбрать из них те, в которых содержится строка \texttt{'state'} (для каждого файла, отвечающего поисковому шаблону, запускается свой процесс)
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+find . -name '*.csv' -exec grep -niE 'state' {} \;
+\end{lstlisting}
+
+Вывести список файлов из текущей директории и всех поддиректорий
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+ls -l *
+\end{lstlisting}
+
+Найти среди файлов с расширением \texttt{*.py} те, в именах которых есть подстрока \texttt{'spark'} (используется конвейер)
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+ls -l *.py | grep -iE 'spark'
+\end{lstlisting}
+
+Найти файлы с расширением \texttt{*.py} и к каждому из них применить команду \texttt{grep}, которая будет искать в файле подстроку \texttt{'argparse'} без учета регистра, с выводом номера строки, на которой она нашла искомую строку по регулярному выражению \texttt{'argparse'} (работает {\color{deepred} медленно}, так как для каждого файла, отвечающего поисковому шаблону запускается свой процесс)
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+find . -maxdepth 1 -name '*.py' -exec grep -inE 'argparse' {} \;
+\end{lstlisting}
+
+Альтернативный вариант с использованием \texttt{xargs} (работает значительно быстрее варианта с \texttt{-exec})
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+find . -maxdepth 1 -name '*.py' | xargs grep -inE 'argparse'
+\end{lstlisting} 
+
+Найти в файлах с расширением \texttt{*.tex} строку \texttt{'section'} без учета регистра и вывести три строки контекста
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+find . -name '*.tex' | xargs grep -iE 'section' -3
+\end{lstlisting}
+
+Вывести список пакетов, в именах которых встречается подстрока \texttt{'python'} с контекстом \texttt{'sql'}
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+conda list | grep -inE 'python.*sql'
+\end{lstlisting}
+
+Получить информацию о доступном метсе на диске
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+df -h
+\end{lstlisting}
+
+Скачать файл с тем же именем, что на удаленном репозитории 
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+curl -O http://merionet.ru/yourfile.tar.gz
+\end{lstlisting}
+
+Скачать файл с удаленного репозитория с новым именем и/или путем
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+curl -o newfile.tar.gz http:// merionet.ru /yourfile.tar.gz
+\end{lstlisting}
+
+Возобновить прерванную загрузку с того места, где она остановилась
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+curl -C - -O http://merionet.ru/yourfile.tar.gz
+\end{lstlisting}
+
+Скачать несколько файлов 
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+curl -O http://merionet.ru/info.html -O http://wiki.merionet.ru/about.html
+\end{lstlisting}
+
+Вывести имена пакетов, имеющих отношение к \texttt{Python}. Ключ \verb|-n| для подавления автоматического вывода всех строк
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+conda list | sed -n '/python/p' 
+\end{lstlisting}
+
+Вывести первые десять строк из списка пакетов, который возвращает \texttt{conda}
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+conda list python | sed -n '1,10p'
+\end{lstlisting}
+
+Заменить в сообщении фиксации \texttt{git} <<Python>> на <<Fortran>>
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git show -s HEAD | sed '1,$s/Python/Fortran/g'
+\end{lstlisting}
+
+Удалить строки в сообщении фиксации, начиная с первой и до первой пустой строки (\verb|/^$|)
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git show -s HEAD | sed '1,/^$/d'
+\end{lstlisting}
+
+Заменить в сообщении фиксации \texttt{git} <<PostgreSQL>> на <<MySQL>> и результат записать в файл
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+git show -s HEAD~2 | sed '1,$s/cookiecutter/somthingelse/g' > output.txt
+\end{lstlisting}
+
+
+
+
+\subsection{Переадресация ввода-вывода}
+
+Перенаправить \emph{стандартный поток вывода} данных (дескриптор файла 1) и \emph{стандартный поток вывода ошибок} (дескриптор файла 2), которые возвращает \texttt{conda} с захватом всех пакетов, в именах которых встречается подстрока \texttt{'python'}, в файл с именем \texttt{test\_file.log} (временный поток вывода данных \texttt{\&1}). Если команда вернет ошибку, то сообщение ошибки перепишет содержимое файла \texttt{test\_file.log}
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+conda list | grep -inE 'python' > test_file.log 2>&1
+\end{lstlisting}
+
+Более короткий вариант рассмотренной выше конструкции
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+conda list | grep -inE 'python' &> test_file.log
+\end{lstlisting}
+
+Присоединить стандартный поток вывода данных и стандартный поток вывода ошибок к содержимому файла. Конструкция \texttt{rm df} возвращает сообщение об ошибке <<\texttt{rm: cannot remove 'df': No such file or directory}>>, которое можно добавить в файл
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+rm df &>> test_file.txt
+\end{lstlisting}
+
+Найти в текущей директории файлы с расширением \texttt{.tex}, в именах которых встречается подстрока <<\texttt{bash}>>, перенаправить эти файлы утилите \texttt{grep}, которая будет искать в теле файлов строки, в которых встречается подстрока <<\texttt{vim}>>, причем стандартный поток вывода ошибок перенаправляется в <<черную дыру>>
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+find . -name '*bash*.tex' | xargs grep -inE 'vim' 2>/dev/null
+\end{lstlisting}
+
+Записать строку в файл и дополнительно вывести строку в терминал
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+echo 'test string' | tee ./logfile.txt
+\end{lstlisting}
+
+\subsection{Информация об использовании дискового пространства}
+
+Вывести размер директорий в Мегабайтах (\texttt{M})
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+du -BM
+\end{lstlisting}
+
+Вывести итоговый размер директории (\texttt{c}) в Мегабайтах (\texttt{M})
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+du -cBM
+\end{lstlisting}
+
+Перевести размеры директорий в понятный человеку формат
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+du -h
+\end{lstlisting}
+
+Вывести информацию об указанной директории в дружественном формате
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+du -sh style_packages/
+\end{lstlisting}
+
+Вывести размер папок текущей директории, не погружаясь глубже корневых папок
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+du -h -d 1
+\end{lstlisting}
+или так
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+du --max-depth=1 -h
+\end{lstlisting}
+
+Вывести информацию об использовании дискового пространства иерархией каталога с подсчетом общего размера каталога и перенаправлением стандартного потока вывода ошибок в <<черную дыру>>
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+du -ch -d 1 2>/dev/null
+\end{lstlisting}
+
+\subsection{Информация о файлах и операциях}
+
+Чтобы узнать используется в файле табуляция или нет достаточно прочитать его в терминал командой \texttt{cat} с ключом \verb|-A|. Символ табуляции в тексте будет представлен парой символов \verb|^I| (что означает <<Ctrl+I>>). К слову, символ \verb|$| отмечает истинный конец строки, помогая увидеть дополнительные пробелы в конце строки
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+cat -A file_name.txt
+\end{lstlisting}
+
+Вывести список удаляемых файлов
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ echo rm -f *.txt
+\end{lstlisting}
+
+Вывести час создания файла
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ stat -c %y file_name.txt | cut -c 12-13  # 17
+\end{lstlisting}
+
+\subsection{Конструкции awk}
+
+Вывести элементы 3-его столбца, значения которых превышают 1000000
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+awk -F ',' '{ if ($3 < 1000000) print $3 }' file_name.csv
+\end{lstlisting}
+
+Прочитать только те строки из файла, которые имеют отношение к <<python>>
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+awk '/python/' file_name.txt
+\end{lstlisting}
+
+Прочитать только те строки, которые отвечают заданному шаблону, и вывести 1-ый и 2-ой столбцы
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+awk '/python/ { print $1, $3 }' file_name.txt
+\end{lstlisting}
+
+Вывести только те строки, которые начинаются с подстроки <<ipy>>
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+awk '$1 ~ /^ipy/' file_name.txt
+\end{lstlisting}
+
+Вывести только строки полей с номерами 4 и 5; при этом нужно вывести только те строки, в которых 4-ое поле начинается с <<"Ham>>
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+awk -F',' '$4 ~ /^"Ham/ { print $4, $5 }' titanic_train.csv
+\end{lstlisting}
+
+Вывести только те строки, значения которых во 2-ом поле равны 1; напечатать 4-ый и 5-ый столбцы
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+awk -F ',' '$2 == 1 { print $4, $5 }' titanic_train.csv | head -n 5
+\end{lstlisting}
+
+Выбрать строки из диапазона строк, который отвечают заданным шаблонам
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+awk -F ',' '/Graham/, /Palsson/' titanic_train.csv
+\end{lstlisting}
+
+Просуммировать все элементы 3-его столбца и вывести результат
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+awk -F ',' '{ sum += $3 } END { print sum }' file_name.csv  # 4.89428e+08
+\end{lstlisting}
+
+Вывести группу строк файла на основе их номеров строк
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+awk -F ',' 'NR == 2, NR == 4' file_name.csv
+\end{lstlisting}
+
+Выбрать только те строки, в которых встречается подстрока <<Mrs.>> и записать их в файл \verb|mrs_output.txt|
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+awk -F ',' '/Mrs./ { print > "mrs_output.txt" }' titanic_train.csv
+\end{lstlisting}
+
+
 
 
 % Источники в "Газовой промышленности" нумеруются по мере упоминания 
