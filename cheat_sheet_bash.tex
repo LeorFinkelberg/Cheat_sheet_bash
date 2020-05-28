@@ -2307,6 +2307,55 @@ numbers = none
 awk -F ',' '/Mrs./ { print > "mrs_output.txt" }' titanic_train.csv
 \end{lstlisting}
 
+Найти idx-файл и отрезать в его имени часть <<pack->>
+
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+ls -l .git/objects/pack/ | grep -iE '*.idx' | awk -F ' ' '{ print $9 }' | sed 's/.*-//'
+\end{lstlisting}
+
+\section{Примеры полезных сценариев на bash}
+
+\subsection{Извлечение имени <<большого>> файла по его контрольной сумме с помощью git}
+
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+#!/bin/bash
+
+GIT_PATH=".git/objects/pack/"
+
+signal_interrupt () {
+    echo "Program was interrupted."
+    exit
+}
+
+# обработка прерывания программы
+trap signal_interrupt SIGINT
+
+git gc &>/dev/null
+
+while true; do
+    idx_file=$(ls -l $GIT_PATH | grep -iE '*.idx' \
+        | awk -F ' ' '{ print $9 }')
+    abs_path_idx_file="${GIT_PATH}${idx_file}"
+    if [[ -f $abs_path_idx_file ]]; then
+        shablob=$(git verify-pack -v $abs_path_idx_file | sort -k 3 -n \
+            | tail -1 | awk -F ' ' '{ print $1 }')
+        filename=$(git rev-list --objects --all | grep $shablob \
+            | awk -F ' ' '{ print $2 }')
+        echo ">>> Big file'sname: $filename"
+        echo ">>> Done."
+        break
+    else
+        echo ">>> Oops. The file '$abs_path_idx_file' doesn't seem to exist."
+    fi
+done
+\end{lstlisting}
+
 
 
 
