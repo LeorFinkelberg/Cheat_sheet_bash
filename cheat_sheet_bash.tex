@@ -2225,7 +2225,7 @@ numbers = none
 $ stat -c %y file_name.txt | cut -c 12-13  # 17
 \end{lstlisting}
 
-\subsection{Конструкции awk}
+\subsection{Управление выводом}
 
 Вывести элементы 3-его столбца, значения которых превышают 1000000
 \begin{lstlisting}[
@@ -2314,6 +2314,14 @@ style = bash,
 numbers = none
 ]
 ls -l .git/objects/pack/ | grep -iE '*.idx' | awk -F ' ' '{ print $9 }' | sed 's/.*-//'
+\end{lstlisting}
+
+Прочитать файл \texttt{master} в стандартный поток вывода, оставить только последнюю строку и вывести 1-ый столбец, а также все столбцы, начиная с 8-ого
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+cat .git/logs/refs/heads/master | tail -1 | cut -d ' ' -f1,8-
 \end{lstlisting}
 
 
