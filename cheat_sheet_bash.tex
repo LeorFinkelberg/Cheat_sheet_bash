@@ -1911,6 +1911,15 @@ numbers = none
 find / -type f -mtime -l ! -name '*.o'
 \end{lstlisting}
 
+Вывести список поддиректорий (\texttt{-type d}) текущей директории (\texttt{.}), в именах которых встречается подстрока \texttt{'cheat'}, без учета регистра (\texttt{-iname})
+
+\begin{lstlisting}[
+language = cmd,
+numbers = none
+]
+find . -type d -iname 'cheat*'
+\end{lstlisting}
+
 Вывод имен файлов и удаление файлов с именами \texttt{core} или \texttt{junk} из рабочего каталога и всех его подкаталогов (круглые скобки обязательно отделяются пробелами)
 
 \begin{lstlisting}[
