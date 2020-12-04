@@ -483,7 +483,7 @@ else
 fi
 \end{lstlisting}
 
-В команде \verb|[[...]]| поддерживаются \emph{классы символов}\footnote{Класс символов POSIX состоит из ключевых слов, заключенных между \texttt{[:} и \texttt{:]}. Эти конструкции должны находится в квадратных скобках скобкового выражения. Например, \texttt{[[:alpha:]!]} соответствует любому одиночному символу или восклицательному знаку \cite[\strbook{98}]{robbins:vim-2013}} POSIX. Ключевые слова описывают различные классы символов, такие как алфавитные, управляющие символы и пр.} POSIX, например
+В команде \verb|[[...]]| поддерживаются \emph{классы символов}\footnote{Класс символов POSIX состоит из ключевых слов, заключенных между \texttt{[:} и \texttt{:]}. Эти конструкции должны находится в квадратных скобках скобкового выражения. Например, \texttt{[[:alpha:]!]} соответствует любому одиночному символу или восклицательному знаку \cite[\strbook{98}]{robbins:vim-2013}} POSIX. Ключевые слова описывают различные классы символов, такие как алфавитные, управляющие символы и пр. POSIX, например
 \begin{lstlisting}[
 style = bash,
 numbers = none
@@ -2339,6 +2339,34 @@ style = bash,
 numbers = none
 ]
 cat .git/logs/refs/heads/master | tail -1 | cut -d ' ' -f1,8-
+\end{lstlisting}
+
+
+\section{Работа с архивами}
+
+Собрать csv-файлы текущей директории в \emph{несжатый} tar-архив 
+\begin{lstlisting}[
+style = bash,
+numbers = none	
+]
+tar -cvf only_csv_files.tar *.csv
+du -sh only_csv_files.tar # 3,8M	only_csv_files.tar
+\end{lstlisting}
+
+Собрать csv-файлы текущей директории в \emph{сжатый} tar-архив 
+\begin{lstlisting}[
+style = bash,
+numbers = none	
+]
+tar -czvf only_csv_files_zip.tar.gz *.csv  # 920K	only_csv_files_zipp.tar.gz
+\end{lstlisting}
+
+Вывести список файлов tar-архива
+\begin{lstlisting}[
+style = bash,
+numbers = none	
+]
+tar -tf only_csv_files_zip.tar.gz
 \end{lstlisting}
 
 
