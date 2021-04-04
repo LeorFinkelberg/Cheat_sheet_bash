@@ -2159,6 +2159,16 @@ numbers = none
 echo 'test string' | tee ./logfile.txt
 \end{lstlisting}
 
+Использовать информацию из <<безымянного файла>>, созданного в терминале с помощью heredoc; прочитает содержимое безымянного файла, запустит утилиту \texttt{psql} и выведет результат ее работы
+\begin{lstlisting}[
+style = bash,
+numbers = none	
+]
+cat <<EOF | psql -U postgres -p 5433 -d demo -f -
+  TABLE tickets LIMIT 5;
+EOF
+\end{lstlisting}
+
 \subsection{Информация об использовании дискового пространства}
 
 Вывести размер директорий в Мегабайтах (\texttt{M})
