@@ -2164,10 +2164,53 @@ echo 'test string' | tee ./logfile.txt
 style = bash,
 numbers = none	
 ]
-cat <<EOF | psql -U postgres -p 5433 -d demo -f -
+cat << EOF | psql -U postgres -p 5433 -d demo -f -
   TABLE tickets LIMIT 5;
 EOF
 \end{lstlisting}
+или так
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+echo "TABLE tickets LIMIT 5;" | psql -U postgres -p 5433 -d demo -f -
+\end{lstlisting}
+
+Еще может быть полезна связка <<\texttt{cat} - \texttt{EOF}>> с перенаправлением
+\begin{lstlisting}[
+style = bash,
+numbers = none	
+]
+cat << EOF > output.txt | tee
+test message!
+EOF
+\end{lstlisting}
+Здесь строки, принадлежащие блоку \texttt{EOF}, будут переданы команде \texttt{cat}, которая перенаправит вывод в файл \texttt{output.txt} и на команду \texttt{tee}, которая в свою очередь перенаправит вывод в стандартный поток вывода (то есть в окно терминала).
+
+Получить свой внешний IP-адрес
+\begin{lstlisting}[
+style = bash,
+numbers = none	
+]
+curl ifconfig.me
+\end{lstlisting}
+
+Получить прогноз погоды
+\begin{lstlisting}[
+style = bash,
+numbers = none	
+]
+curl wttr.in/Moscow
+\end{lstlisting}
+
+Если требуется выполнить какую-то команду в другой директории, не покидая текущую, следует просто обернуть эту команду круглыми скобами, которые запустят \emph{подоболочку} (subshell) и выполнят в ней заданную команду
+\begin{lstlisting}[
+style = bash,
+numbers = none	
+]
+(cd /tmp && ls -l)
+\end{lstlisting}
+
 
 \subsection{Информация об использовании дискового пространства}
 
