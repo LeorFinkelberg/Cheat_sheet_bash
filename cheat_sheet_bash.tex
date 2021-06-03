@@ -2176,6 +2176,17 @@ numbers = none
 echo "TABLE tickets LIMIT 5;" | psql -U postgres -p 5433 -d demo -f -
 \end{lstlisting}
 
+Выполнить Python-сценарий без создания файла
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+cat << EOF | python
+import math
+print(math.exp(3))
+EOF
+\end{lstlisting}
+
 Еще может быть полезна связка <<\texttt{cat} - \texttt{EOF}>> с перенаправлением
 \begin{lstlisting}[
 style = bash,
