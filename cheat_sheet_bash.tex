@@ -2181,7 +2181,7 @@ echo "TABLE tickets LIMIT 5;" | psql -U postgres -p 5433 -d demo -f -
 style = bash,
 numbers = none
 ]
-cat << EOF | python
+cat << EOF | ptpython
 import math
 print(math.exp(3))
 EOF
