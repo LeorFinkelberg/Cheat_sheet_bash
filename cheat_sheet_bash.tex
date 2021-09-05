@@ -93,6 +93,14 @@ $ ls -l bash_test.sh
 # -rwxr-xr-x 1 ADM 197121 31 май 19 02:55 bash_test.sh*
 \end{lstlisting}
 
+Проиндексировать файл и сделать его исполняемым можно так
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ git add --chmod=+x file.sh
+\end{lstlisting}
+
 \subsection{Местоположение файла сценария}
 
 Теперь можно вызывать этот скрипт
