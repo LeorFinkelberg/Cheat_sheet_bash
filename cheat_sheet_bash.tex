@@ -2058,6 +2058,14 @@ numbers = none
 curl -O http://merionet.ru/yourfile.tar.gz
 \end{lstlisting}
 
+Передать json-файл веб-сервису (путь до файла данных должен начинаться с символа \verb|@|)
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+curl -X POST "Content-Type: application/json" --data "@file_name.json" "localhost:5000/api/solver/balance"
+\end{lstlisting}
+
 Скачать файл с удаленного репозитория с новым именем и/или путем
 \begin{lstlisting}[
 language = cmd,
