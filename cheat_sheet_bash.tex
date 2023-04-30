@@ -1908,6 +1908,45 @@ $ vim -O2 file_name1.txt file_name2.txt
 \end{lstlisting}
 
 
+\section{Обновление версии Git на Centos 7}
+
+По умолчанию на Cetnos 7 стоит Git 1.8.X. Для того чтобы обновить Git нужно просто запустить следующий сценарий
+\begin{lstlisting}[
+title = {\sffamily gitupgrade.sh},
+style = bash,
+numbers = none
+]
+#!/bin/bash
+yum -y remove git
+yum -y clean packages
+mkdir tempgit
+cd tempgit
+yum install -y autoconf cpio curl-devel expat-devel gcc gettext-devel make
+openssl-devel perl-ExtUtils-MakeMaker zlib-devel
+wget -O v2.24.1.tar.gz https://github.com/git/git/archive/v2.24.1.tar.gz
+tar -xzvf ./v2.24.1.tar.gz
+cd git-2.24.1/
+make configure
+./configure --prefix=/usr/local/git
+make && make install
+ln -sf /usr/local/git/bin/* /usr/bin/
+cd ..
+rm -fr git-2.24.1
+cd ..
+rm -fr tempgit
+echo "results"
+which git
+git --version
+\end{lstlisting}
+как
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ chmod +x gitupgrade.sh
+$ sudo ./gitupgrade.sh
+\end{lstlisting}
+
 \section{Полезные конструкции оболочки \texttt{bash}}
 
 Найти в корневом каталоге и всех подкатлогах (\texttt{/}), обычные файлы (\texttt{-type f}), измененные за последний день (\texttt{-mtime -l}), за исключением тех файлов, у которых есть суффикс \texttt{.o} (\texttt{! -name '*.o'})
