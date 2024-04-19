@@ -1697,6 +1697,115 @@ done
 
 Здесь в каждой ловушке используется своя функция, которая будет вызвана для обработки конкретного сигнала. Обратите внимание на включение команды \texttt{exit} в обе функции обработки сигналов. Без этого сценарий продолжил бы выполняться после завершения функция.
 
+\section{Приемы работы с мендежером пакетов pacman}
+
+\subsection{Общие замечания}
+
+\texttt{pacman} \url{https://wiki.manjaro.org/index.php/Pacman_Overview/ru} -- утилита командной строки, предназначенная для управления пакетами дистрибутивов, основанных на Arch Linux.
+
+\subsection{Полезные конструкции}
+
+Обновить базу данных пакетов и обновить все пакеты в системе
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ sudo pacman -Syu
+\end{lstlisting}
+
+Поиск доступных пакетов (утилита будет искать ключевое слово как в имени пакета, так и в его описани)
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ pacman -Ss <package_name>
+\end{lstlisting}
+
+\remark[red]{
+Никода не устанавливайте пакеты без предварительного обновления системы! Это может привести к разрушению состояния системы
+}
+
+Пакеты безопаснее устанавливать командной с флагами \verb*|-Syu| (они обеспечивают предварительное обновление системы)
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ sudo pacman -Syu <package_name>
+\end{lstlisting}
+
+Вывести список установленных пакетов
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ pacman -Qqe | grep -v "$(pacman -Qmq)"
+\end{lstlisting}
+
+\remark[red]{
+При удалении пакетов всегда просматривайте список пакетов перед подтверждением. Иначе можно удалить весь рабочий стол из-за зависимостей
+}
+
+Удалить пакет можно так
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ sudo pacman -R <package_name>
+\end{lstlisting}
+
+Чтобы удалить пакет вместе с его зависимостями, следует использовать флаги \verb*|-Rsu|
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ sudo pacman -Rsu <package_name>
+\end{lstlisting}
+
+Вывести список \emph{сирот}
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ pacman -Qdt
+\end{lstlisting}
+
+Для удаления всех сирот
+\begin{lstlisting}[
+	style = bash,
+	numbers = none
+	]
+	$ sudo pacman -Rs $(pacman -Qdt)
+\end{lstlisting}
+
+Иногда бывает полезно узнать какой пакет владеет файлом
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ pacman -Qo /usr/bin/xargs  # /usr/bin/xargs is owned by findutils 4.9.0-3
+\end{lstlisting}
+
+Когда pacman устанавливает пакеты, он сохраняет копии всех старых пакетов, которые были загружены ранее. Этот кэш может быть очень полезен, если требуется срочно установить старые версии пакетов
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ sudo pacman -Sc
+\end{lstlisting}
+
+Установить Docker на Manjaro можно так
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ sudo pacman -S docker
+$ sudo systemctl status docker
+$ sudo systemctl start docker
+$ sudo systemctl stop docker
+\end{lstlisting}
+
+
+
 \section{Язык обработки шаблонов awk. Базовые концепции}
 
 Программа на \texttt{awk} (программа, набранная в командной строке или в файле программы) состоит из одной и более строк, в которых содержится \emph{шаблон} и/или \emph{действие} в следующем формате: \verb|шаблон { действие }|.
