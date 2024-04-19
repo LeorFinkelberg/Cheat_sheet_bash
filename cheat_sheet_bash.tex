@@ -1804,6 +1804,56 @@ $ sudo systemctl start docker
 $ sudo systemctl stop docker
 \end{lstlisting}
 
+PostgreSQL на Manjaro устанавливается следующим образом
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ sudo pacman -Syu postgresql
+$ sudo su postgres -l
+# А затем нужно проинициализировать СУБД
+$ initdb --locale $LANG -E UTF8 -D '/var/lib/postgres/data/'
+# Файлы, относящиеся к этой СУБД, будут принадлежать пользователю "postgres"
+От его имени также будет запускаться процесс сервера
+...
+Теперь вы можете запустить сервер баз данных
+pg_ctl -D /var/lib/postgres/data/ -l lofgile start
+\end{lstlisting}
+
+Последнюю команду (\verb|pg_ctl|) не нужно запускать отдельно вручную. Для запуска сервера PostgreSQL достаточно выполнить
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ sudo systemctl status postgresql
+$ sudo systemctl start postgresql
+$ sudo systemctl stop postgresql
+\end{lstlisting}
+
+Для запуска \verb*|psql| необходимо аутентифицироваться как пользователь postgres
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ sudo passwd postres
+Новый пароль: # вводим пароль
+Повторите ввод нового пароля: # повторяем ввод пароля
+passwd: password updated successfully
+\end{lstlisting}
+
+Заходим этим пользователем
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ su - postgres
+password: 
+[...]$ psql
+psql (16.1)
+Type "help" for help.
+postgres=# \dl+
+\end{lstlisting}
+
 
 
 \section{Язык обработки шаблонов awk. Базовые концепции}
