@@ -2658,6 +2658,16 @@ numbers = none
 sed s/\!\!int/\!\!float/g config.yaml
 \end{lstlisting}
 
+Распарсить ответ Python-requests с помощью утилиты \verb*|jq| \url{https://hatinfosec.wordpress.com/2021/07/07/linux-jq-command-for-json-processing/}
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+# Если одинарные кавычки не заменить двойными,
+# то будет ошибка jq: parse error: Invalid numeric literal at line 1, column XXX
+$ python run_request.py | sed "s/'/\"/g" | jq
+\end{lstlisting}
+
 
 
 % Источники в "Газовой промышленности" нумеруются по мере упоминания 
