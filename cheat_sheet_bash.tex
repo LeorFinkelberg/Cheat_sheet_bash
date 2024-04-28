@@ -319,6 +319,26 @@ report_home_space () {
 
 Без ключей утилита \texttt{tee} переписывает файл вывода, если они существуют, и реагирует на прерывания. Ключ \verb|-a| заставляет утилиту добавлять вывод к существующим файлам вместо их переписывания.
 
+Еще один вариант с конструкцией EOF
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+kubectl apply -n kserve-test -f - <<EOF
+apiVersion: "serving.kserve.io/v1beta1"
+kind: "InferenceService"
+metadata:
+	name: "sklearn-iris"
+spec:
+	predictor:
+		canaryTrafficPercent: 10
+		model:
+			modelFormat:
+				name: sklearn
+			storageUri: "gs://kfserving-examples/models/sklearn/1.0/model-2"
+EOF
+\end{lstlisting}
+
 \subsection{Функции}
 
 Функции имеют две синтаксические формы. Первая выглядит так
