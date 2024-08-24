@@ -2058,6 +2058,27 @@ numbers = none
 curl -O http://merionet.ru/yourfile.tar.gz
 \end{lstlisting}
 
+Если при попытке скачать файл возникает следующая ошибка
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+curl: (60) SSL certificate problem: self signed certificate in certificate chain
+More details here: https://curl.se/docs/sslcerts.html
+
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the web page mentioned above.
+\end{lstlisting}
+то нужно просто добавить флаг \verb|-k| к команде \verb|curl|, то есть
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ curl -o ./launches.json -L https://ll.thespacedevs.com/2.0.0/launch/upcoming -k
+$ cat ./launches.json | jq
+\end{lstlisting}
+
 Скачать файл с удаленного репозитория с новым именем и/или путем
 \begin{lstlisting}[
 language = cmd,
