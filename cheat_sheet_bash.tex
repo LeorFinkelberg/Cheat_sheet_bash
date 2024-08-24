@@ -319,6 +319,26 @@ report_home_space () {
 
 Без ключей утилита \texttt{tee} переписывает файл вывода, если они существуют, и реагирует на прерывания. Ключ \verb|-a| заставляет утилиту добавлять вывод к существующим файлам вместо их переписывания.
 
+Еще один вариант с конструкцией EOF
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+kubectl apply -n kserve-test -f - <<EOF
+apiVersion: "serving.kserve.io/v1beta1"
+kind: "InferenceService"
+metadata:
+	name: "sklearn-iris"
+spec:
+	predictor:
+		canaryTrafficPercent: 10
+		model:
+			modelFormat:
+				name: sklearn
+			storageUri: "gs://kfserving-examples/models/sklearn/1.0/model-2"
+EOF
+\end{lstlisting}
+
 \subsection{Функции}
 
 Функции имеют две синтаксические формы. Первая выглядит так
@@ -1697,6 +1717,165 @@ done
 
 Здесь в каждой ловушке используется своя функция, которая будет вызвана для обработки конкретного сигнала. Обратите внимание на включение команды \texttt{exit} в обе функции обработки сигналов. Без этого сценарий продолжил бы выполняться после завершения функция.
 
+\section{Приемы работы с мендежером пакетов pacman}
+
+\subsection{Общие замечания}
+
+\texttt{pacman} \url{https://wiki.manjaro.org/index.php/Pacman_Overview/ru} -- утилита командной строки, предназначенная для управления пакетами дистрибутивов, основанных на Arch Linux.
+
+\subsection{Полезные конструкции}
+
+Обновить базу данных пакетов и обновить все пакеты в системе
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ sudo pacman -Syu
+\end{lstlisting}
+
+Поиск доступных пакетов (утилита будет искать ключевое слово как в имени пакета, так и в его описани)
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ pacman -Ss <package_name>
+\end{lstlisting}
+
+\remark[red]{
+Никода не устанавливайте пакеты без предварительного обновления системы! Это может привести к разрушению состояния системы
+}
+
+Пакеты безопаснее устанавливать командной с флагами \verb*|-Syu| (они обеспечивают предварительное обновление системы)
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ sudo pacman -Syu <package_name>
+\end{lstlisting}
+
+Вывести список установленных пакетов
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ pacman -Qqe | grep -v "$(pacman -Qmq)"
+\end{lstlisting}
+
+\remark[red]{
+При удалении пакетов всегда просматривайте список пакетов перед подтверждением. Иначе можно удалить весь рабочий стол из-за зависимостей
+}
+
+Удалить пакет можно так
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ sudo pacman -R <package_name>
+\end{lstlisting}
+
+Чтобы удалить пакет вместе с его зависимостями, следует использовать флаги \verb*|-Rsu|
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ sudo pacman -Rsu <package_name>
+\end{lstlisting}
+
+Вывести список \emph{сирот}
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ pacman -Qdt
+\end{lstlisting}
+
+Для удаления всех сирот
+\begin{lstlisting}[
+	style = bash,
+	numbers = none
+	]
+	$ sudo pacman -Rs $(pacman -Qdt)
+\end{lstlisting}
+
+Иногда бывает полезно узнать какой пакет владеет файлом
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ pacman -Qo /usr/bin/xargs  # /usr/bin/xargs is owned by findutils 4.9.0-3
+\end{lstlisting}
+
+Когда pacman устанавливает пакеты, он сохраняет копии всех старых пакетов, которые были загружены ранее. Этот кэш может быть очень полезен, если требуется срочно установить старые версии пакетов
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ sudo pacman -Sc
+\end{lstlisting}
+
+Установить Docker на Manjaro можно так
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ sudo pacman -S docker
+$ sudo systemctl status docker
+$ sudo systemctl start docker
+$ sudo systemctl stop docker
+\end{lstlisting}
+
+PostgreSQL на Manjaro устанавливается следующим образом
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ sudo pacman -Syu postgresql
+$ sudo su postgres -l
+# А затем нужно проинициализировать СУБД
+$ initdb --locale $LANG -E UTF8 -D '/var/lib/postgres/data/'
+# Файлы, относящиеся к этой СУБД, будут принадлежать пользователю "postgres"
+От его имени также будет запускаться процесс сервера
+...
+Теперь вы можете запустить сервер баз данных
+pg_ctl -D /var/lib/postgres/data/ -l lofgile start
+\end{lstlisting}
+
+Последнюю команду (\verb|pg_ctl|) не нужно запускать отдельно вручную. Для запуска сервера PostgreSQL достаточно выполнить
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ sudo systemctl status postgresql
+$ sudo systemctl start postgresql
+$ sudo systemctl stop postgresql
+\end{lstlisting}
+
+Для запуска \verb*|psql| необходимо аутентифицироваться как пользователь postgres
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ sudo passwd postres
+Новый пароль: # вводим пароль
+Повторите ввод нового пароля: # повторяем ввод пароля
+passwd: password updated successfully
+\end{lstlisting}
+
+Заходим этим пользователем
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ su - postgres
+password: 
+[...]$ psql
+psql (16.1)
+Type "help" for help.
+postgres=# \dl+
+\end{lstlisting}
+
+
+
 \section{Язык обработки шаблонов awk. Базовые концепции}
 
 Программа на \texttt{awk} (программа, набранная в командной строке или в файле программы) состоит из одной и более строк, в которых содержится \emph{шаблон} и/или \emph{действие} в следующем формате: \verb|шаблон { действие }|.
@@ -1908,6 +2087,45 @@ $ vim -O2 file_name1.txt file_name2.txt
 \end{lstlisting}
 
 
+\section{Обновление версии Git на Centos 7}
+
+По умолчанию на Cetnos 7 стоит Git 1.8.X. Для того чтобы обновить Git нужно просто запустить следующий сценарий
+\begin{lstlisting}[
+title = {\sffamily gitupgrade.sh},
+style = bash,
+numbers = none
+]
+#!/bin/bash
+yum -y remove git
+yum -y clean packages
+mkdir tempgit
+cd tempgit
+yum install -y autoconf cpio curl-devel expat-devel gcc gettext-devel make
+openssl-devel perl-ExtUtils-MakeMaker zlib-devel
+wget -O v2.24.1.tar.gz https://github.com/git/git/archive/v2.24.1.tar.gz
+tar -xzvf ./v2.24.1.tar.gz
+cd git-2.24.1/
+make configure
+./configure --prefix=/usr/local/git
+make && make install
+ln -sf /usr/local/git/bin/* /usr/bin/
+cd ..
+rm -fr git-2.24.1
+cd ..
+rm -fr tempgit
+echo "results"
+which git
+git --version
+\end{lstlisting}
+как
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ chmod +x gitupgrade.sh
+$ sudo ./gitupgrade.sh
+\end{lstlisting}
+
 \section{Полезные конструкции оболочки \texttt{bash}}
 
 Найти в корневом каталоге и всех подкатлогах (\texttt{/}), обычные файлы (\texttt{-type f}), измененные за последний день (\texttt{-mtime -l}), за исключением тех файлов, у которых есть суффикс \texttt{.o} (\texttt{! -name '*.o'})
@@ -2077,6 +2295,14 @@ numbers = none
 ]
 $ curl -o ./launches.json -L https://ll.thespacedevs.com/2.0.0/launch/upcoming -k
 $ cat ./launches.json | jq
+\end{lstlisting}
+
+Передать json-файл веб-сервису (путь до файла данных должен начинаться с символа \verb|@|)
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+curl -X POST "Content-Type: application/json" --data "@file_name.json" "localhost:5000/api/solver/balance"
 \end{lstlisting}
 
 Скачать файл с удаленного репозитория с новым именем и/или путем
@@ -2471,6 +2697,16 @@ numbers = none
 ]
 # приходится экранировать восклицательный знак
 sed s/\!\!int/\!\!float/g config.yaml
+\end{lstlisting}
+
+Распарсить ответ Python-requests с помощью утилиты \verb*|jq| \url{https://hatinfosec.wordpress.com/2021/07/07/linux-jq-command-for-json-processing/}
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+# Если одинарные кавычки не заменить двойными,
+# то будет ошибка jq: parse error: Invalid numeric literal at line 1, column XXX
+$ python run_request.py | sed "s/'/\"/g" | jq
 \end{lstlisting}
 
 
