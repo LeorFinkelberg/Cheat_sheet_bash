@@ -2305,6 +2305,17 @@ numbers = none
 curl -X POST "Content-Type: application/json" --data "@file_name.json" "localhost:5000/api/solver/balance"
 \end{lstlisting}
 
+Передать путь изображения в формате \verb|jpeg| можно так
+\begin{lstlisting}[
+style = bash,
+numbers = none
+]
+$ curl --request POST \
+  --url http://localhost:8000/ \
+  --header 'content-type: image/jpeg' \
+  --data-binary @'/path/to/image.jpeg'
+\end{lstlisting}
+
 Скачать файл с удаленного репозитория с новым именем и/или путем
 \begin{lstlisting}[
 language = cmd,
